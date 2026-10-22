@@ -1,0 +1,124 @@
+---
+import '../styles/global.css';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE, LOCALES, DEFAULT_LOCALE, type Locale } from '../data/site';
+import { useTranslations, localePath, withBase } from '../i18n/utils';
+import defaultOg from '../assets/og-default.png';
+
+interface Props {
+  lang: Locale;
+  title: string;
+  description?: string;
+  /** Language-neutral path, e.g. "/games/spincraft/". Used for canonical + hreflang. */
+  path: string;
+  /** Languages this page exists in. Defaults to all site languages. */
+  alternates?: readonly Locale[];
+  /** Point canonical to another language (used for untranslated fallbacks). */
+  canonicalLang?: Locale;
+  image?: ImageMetadata;
+  imageAlt?: string;
+  type?: 'website' | 'article';
+  jsonLd?: Record<string, unknown>[];
+  noindex?: boolean;
+}
+
+const {
+  lang,
+  title,
+  description,
+  path,
+  alternates = LOCALES,
+  canonicalLang = lang,
+  image,
+  imageAlt,
+  type = 'website',
+  jsonLd = [],
+  noindex = false,
+} = Astro.props;
+
+const t = useTranslations(lang);
+const desc = description ?? t('site.description');
+const fullTitle = title === SITE.name ? `${SITE.name} — ${t('site.tagline')}` : `${title} | ${SITE.name}`;
+
+const site = Astro.site!;
+const abs = (p: string) => new URL(p, site).href;
+const canonical = abs(localePath(canonicalLang, path));
+
+const og = await getImage({ src: image ?? defaultOg, width: 1200, format: 'jpg', quality: 82 });
+const ogUrl = abs(og.src);
+
+const organization = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${abs(withBase('/'))}#organization`,
+  name: SITE.name,
+  url: abs(localePath(DEFAULT_LOCALE, '/')),
+  email: SITE.email,
+  logo: abs(withBase('/favicon.svg')),
+};
+const structured = [organization, ...jsonLd];
+const ogLocale = { en: 'en_US', tr: 'tr_TR' } as const;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={desc} />
+    {!noindex && <link rel="canonical" href={canonical} />}
+    {
+      !noindex && alternates.map((l) => (
+        <link rel="alternate" hreflang={l} href={abs(localePath(l, path))} />
+      ))
+    }
+    {
+      !noindex && alternates.includes(DEFAULT_LOCALE) && (
+        <link rel="alternate" hreflang="x-default" href={abs(localePath(DEFAULT_LOCALE, path))} />
+      )
+    }
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#090B10" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    <link rel="sitemap" href={withBase('/sitemap-index.xml')} />
+
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogUrl} />
+    <meta property="og:image:width" content={String(og.attributes.width ?? 1200)} />
+    <meta property="og:image:height" content={String(og.attributes.height ?? 630)} />
+    {imageAlt && <meta property="og:image:alt" content={imageAlt} />}
+    <meta property="og:locale" content={ogLocale[lang]} />
+    {
+      alternates
+        .filter((l) => l !== lang)
+        .map((l) => <meta property="og:locale:alternate" content={ogLocale[l]} />)
+    }
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={desc} />
+    <meta name="twitter:image" content={ogUrl} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(structured)} />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] btn btn-primary"
+      >{t('nav.skip')}</a
+    >
+    <Header lang={lang} path={path} alternates={alternates} />
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+    <Footer lang={lang} path={path} alternates={alternates} />
+  </body>
+</html>

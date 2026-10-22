@@ -1,0 +1,78 @@
+---
+import Logo from './Logo.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { SITE, type Locale } from '../data/site';
+import { localePath, useTranslations } from '../i18n/utils';
+import type { UIKey } from '../i18n/ui';
+
+interface Props {
+  lang: Locale;
+  path: string;
+  alternates: readonly Locale[];
+}
+const { lang, path, alternates } = Astro.props;
+const t = useTranslations(lang);
+const year = new Date().getFullYear();
+const years = year > SITE.copyrightStartYear ? `${SITE.copyrightStartYear}–${year}` : `${year}`;
+
+const columns: { title: UIKey; links: { key: UIKey; path: string }[] }[] = [
+  {
+    title: 'footer.studio',
+    links: [
+      { key: 'nav.games', path: '/games/' },
+      { key: 'nav.devlogs', path: '/devlogs/' },
+      { key: 'nav.downloads', path: '/downloads/' },
+      { key: 'nav.about', path: '/about/' },
+    ],
+  },
+  {
+    title: 'footer.help',
+    links: [
+      { key: 'nav.support', path: '/support/' },
+      { key: 'nav.contact', path: '/contact/' },
+    ],
+  },
+  {
+    title: 'footer.legal',
+    links: [
+      { key: 'footer.privacy', path: '/privacy-policy/' },
+      { key: 'footer.terms', path: '/terms-of-use/' },
+    ],
+  },
+];
+---
+
+<footer class="mt-24 border-t border-line bg-bg-2/60">
+  <div class="container-site grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+    <div>
+      <Logo size={36} />
+      <p class="mt-4 max-w-xs text-sm text-muted">{t('footer.blurb')}</p>
+      <a href={`mailto:${SITE.email}`} class="mt-4 inline-block text-sm link">{SITE.email}</a>
+    </div>
+    {
+      columns.map((col) => (
+        <div>
+          <h2 class="text-xs font-bold uppercase tracking-[0.14em] text-muted">{t(col.title)}</h2>
+          <ul class="mt-4 space-y-2.5">
+            {col.links.map((l) => (
+              <li>
+                <a href={localePath(lang, l.path)} class="text-sm text-text/90 hover:text-accent-text transition-colors">
+                  {t(l.key)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+  <div class="border-t border-line">
+    <div class="container-site flex flex-col-reverse gap-4 py-6 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+      <p>© {years} {SITE.name}. {t('footer.rights')}</p>
+      <div class="flex items-center gap-3">
+        <span>{t('footer.language')}:</span>
+        <LanguageSwitcher lang={lang} path={path} alternates={alternates} />
+      </div>
+    </div>
+  </div>
+</footer>

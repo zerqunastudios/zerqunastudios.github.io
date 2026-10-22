@@ -1,0 +1,116 @@
+---
+import Logo from './Logo.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import type { Locale } from '../data/site';
+import { localePath, useTranslations } from '../i18n/utils';
+import type { UIKey } from '../i18n/ui';
+
+interface Props {
+  lang: Locale;
+  path: string;
+  alternates: readonly Locale[];
+}
+const { lang, path, alternates } = Astro.props;
+const t = useTranslations(lang);
+
+const nav: { key: UIKey; path: string }[] = [
+  { key: 'nav.home', path: '/' },
+  { key: 'nav.games', path: '/games/' },
+  { key: 'nav.devlogs', path: '/devlogs/' },
+  { key: 'nav.downloads', path: '/downloads/' },
+  { key: 'nav.about', path: '/about/' },
+  { key: 'nav.support', path: '/support/' },
+  { key: 'nav.contact', path: '/contact/' },
+];
+const isActive = (p: string) => (p === '/' ? path === '/' : path.startsWith(p));
+---
+
+<header class="sticky top-0 z-50 border-b border-line/70 bg-bg/85 backdrop-blur-md">
+  <div class="container-site flex h-16 items-center justify-between gap-4">
+    <a href={localePath(lang, '/')} class="shrink-0" aria-label="Zerquna Studios — home">
+      <Logo size={34} />
+    </a>
+
+    <nav aria-label={t('nav.main')} class="hidden lg:block">
+      <ul class="flex items-center gap-1">
+        {
+          nav.map((item) => (
+            <li>
+              <a
+                href={localePath(lang, item.path)}
+                aria-current={isActive(item.path) ? 'page' : undefined}
+                class:list={[
+                  'rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  isActive(item.path) ? 'text-text bg-card' : 'text-muted hover:text-text',
+                ]}
+              >
+                {t(item.key)}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <LanguageSwitcher lang={lang} path={path} alternates={alternates} />
+      <button
+        type="button"
+        class="lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-md border border-line text-text"
+        aria-controls="mobile-nav"
+        aria-expanded="false"
+        data-menu-toggle
+      >
+        <span class="sr-only" data-label-open>{t('nav.menu')}</span>
+        <span class="sr-only hidden" data-label-close>{t('nav.close')}</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" data-icon-open></path>
+          <path d="M6 6l12 12M18 6L6 18" class="hidden" data-icon-close></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav id="mobile-nav" aria-label={t('nav.main')} class="lg:hidden hidden border-t border-line bg-bg" data-menu>
+    <ul class="container-site py-3">
+      {
+        nav.map((item) => (
+          <li>
+            <a
+              href={localePath(lang, item.path)}
+              aria-current={isActive(item.path) ? 'page' : undefined}
+              class:list={[
+                'block rounded-md px-3 py-3 text-base font-medium',
+                isActive(item.path) ? 'text-text bg-card' : 'text-muted hover:text-text',
+              ]}
+            >
+              {t(item.key)}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  if (toggle && menu) {
+    const set = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      menu.classList.toggle('hidden', !open);
+      toggle.querySelector('[data-icon-open]')?.classList.toggle('hidden', open);
+      toggle.querySelector('[data-icon-close]')?.classList.toggle('hidden', !open);
+      toggle.querySelector('[data-label-open]')?.classList.toggle('hidden', open);
+      toggle.querySelector('[data-label-close]')?.classList.toggle('hidden', !open);
+    };
+    toggle.addEventListener('click', () => set(toggle.getAttribute('aria-expanded') !== 'true'));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        set(false);
+        toggle.focus();
+      }
+    });
+  }
+</script>

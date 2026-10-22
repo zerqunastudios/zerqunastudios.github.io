@@ -1,0 +1,39 @@
+---
+import { LOCALES, type Locale } from '../data/site';
+import { localePath, useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang: Locale;
+  path: string;
+  alternates: readonly Locale[];
+  class?: string;
+}
+const { lang, path, alternates, class: className = '' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<nav aria-label={t('lang.switch')} class:list={['flex items-center gap-1 text-sm', className]}>
+  {
+    LOCALES.map((l) => {
+      // Go to the same page in the other language; fall back to its homepage.
+      const href = localePath(l, alternates.includes(l) ? path : '/');
+      const current = l === lang;
+      return (
+        <a
+          href={href}
+          hreflang={l}
+          lang={l}
+          aria-current={current ? 'true' : undefined}
+          title={t(`lang.${l}`)}
+          class:list={[
+            'rounded-md px-2.5 py-1.5 font-semibold uppercase tracking-wider transition-colors',
+            current ? 'bg-card text-text' : 'text-muted hover:text-text',
+          ]}
+        >
+          {l}
+          <span class="sr-only"> — {t(`lang.${l}`)}</span>
+        </a>
+      );
+    })
+  }
+</nav>

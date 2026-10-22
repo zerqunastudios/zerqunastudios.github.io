@@ -1,0 +1,29 @@
+---
+import type { GameStatus } from '../data/games';
+import type { Locale } from '../data/site';
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  status: GameStatus;
+  lang: Locale;
+  class?: string;
+}
+const { status, lang, class: className = '' } = Astro.props;
+const t = useTranslations(lang);
+const styles: Record<GameStatus, string> = {
+  released: 'text-ok border-ok/40 bg-ok/10',
+  'demo-available': 'text-warn border-warn/40 bg-warn/10',
+  'in-development': 'text-[#9fb4ff] border-[#9fb4ff]/40 bg-[#9fb4ff]/10',
+};
+---
+
+<span
+  class:list={[
+    'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold',
+    styles[status],
+    className,
+  ]}
+>
+  <span class="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true"></span>
+  {t(`status.${status}`)}
+</span>

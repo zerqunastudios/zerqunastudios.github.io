@@ -1,0 +1,41 @@
+---
+// Click-to-load YouTube player: nothing is requested from YouTube until the
+// visitor presses play, and the privacy-enhanced youtube-nocookie.com domain is used.
+import type { Locale } from '../data/site';
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  videoId: string;
+  title: string;
+  lang: Locale;
+}
+const { videoId, title, lang } = Astro.props;
+const t = useTranslations(lang);
+const safeId = videoId.replace(/[^a-zA-Z0-9_-]/g, '');
+---
+
+<div class="card relative aspect-video overflow-hidden" data-trailer={safeId} data-title={title}>
+  <button
+    type="button"
+    class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[radial-gradient(ellipse_at_center,#2a3242_0%,#0d1016_75%)] text-text"
+  >
+    <span class="flex h-16 w-16 items-center justify-center rounded-full bg-accent-strong" aria-hidden="true">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+    </span>
+    <span class="text-sm font-semibold">{t('game.trailerPlay')}</span>
+  </button>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-trailer]').forEach((box) => {
+    box.querySelector('button')?.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${box.dataset.trailer}?autoplay=1&rel=0`;
+      iframe.title = box.dataset.title ?? 'Trailer';
+      iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.className = 'absolute inset-0 h-full w-full';
+      box.replaceChildren(iframe);
+    });
+  });
+</script>

@@ -1,0 +1,196 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE, type Locale } from '../../data/site';
+import { getLangStaticPaths, localePath, formatDate, useTranslations } from '../../i18n/utils';
+
+export const getStaticPaths = getLangStaticPaths;
+const lang = Astro.params.lang as Locale;
+const t = useTranslations(lang);
+const updated = formatDate(SITE.termsUpdated, lang);
+const mail = `mailto:${SITE.email}`;
+const privacy = localePath(lang, '/privacy-policy/');
+---
+
+<BaseLayout
+  lang={lang}
+  title={t('footer.terms')}
+  description={lang === 'en'
+    ? 'Terms of Use for the Zerquna Studios website: use of site content, copyright, external store links and third-party services.'
+    : 'Zerquna Studios web sitesi Kullanım Koşulları: site içeriğinin kullanımı, telif hakları, harici mağaza bağlantıları ve üçüncü taraf hizmetler.'}
+  path="/terms-of-use/"
+>
+  <section class="border-b border-line">
+    <div class="container-site py-14 sm:py-20">
+      <p class="eyebrow">{t('footer.legal')}</p>
+      <h1 class="mt-2 text-3xl font-bold sm:text-5xl">{t('footer.terms')}</h1>
+      <p class="mt-4 text-muted">
+        {t('common.lastUpdated')}: <time datetime={SITE.termsUpdated}>{updated}</time>
+      </p>
+    </div>
+  </section>
+
+  <article class="container-site prose-site mt-10">
+    {
+      lang === 'en' ? (
+        <Fragment>
+          <h2 id="about">1. About these terms</h2>
+          <p>
+            These Terms of Use apply to this website, operated by Zerquna Studios. By using the website, you agree to
+            these terms. If you do not agree, please do not use the website.
+          </p>
+          <p>
+            These terms cover the <strong>website only</strong>. They are not the licence for our games. When you buy,
+            download or play a Zerquna Studios game, the game’s own licence or end-user licence agreement (EULA) and the
+            terms of the store you got it from apply instead.
+          </p>
+
+          <h2 id="use">2. Using the website</h2>
+          <p>You may browse and read this website for personal, non-commercial purposes. You agree not to:</p>
+          <ul>
+            <li>try to disrupt, overload or gain unauthorised access to the website or its hosting;</li>
+            <li>use the website for anything unlawful, or to distribute malware;</li>
+            <li>present our games, names or materials in a way that suggests you are Zerquna Studios or are endorsed by us.</li>
+          </ul>
+
+          <h2 id="copyright">3. Content and copyright</h2>
+          <p>
+            Unless stated otherwise, the content of this website, including text, game names, logos, screenshots,
+            artwork and videos, belongs to Zerquna Studios or is used with permission, and is protected by copyright and
+            other laws. You may not copy, sell or republish it for commercial purposes without our written permission.
+          </p>
+          <p>
+            Press and content creators who want to use our materials in coverage of our games are welcome to{' '}
+            <a href={localePath(lang, '/contact/#press')}>contact us</a>.
+          </p>
+          <p>
+            Names and logos of other companies mentioned on this website, such as Microsoft Store, itch.io, Steam, Unity,
+            Godot and GitHub, belong to their respective owners. Mentioning them does not mean they endorse us.
+          </p>
+
+          <h2 id="stores">4. External store links</h2>
+          <p>
+            This website links to external stores and platforms, such as Microsoft Store and itch.io, where you can get
+            our games. These sites are run by other companies and have their own terms and privacy policies. Purchases,
+            payments, downloads and refunds are handled by those stores, under their rules. We are not responsible for
+            the content or availability of external websites.
+          </p>
+          <p>
+            We only link to official store pages and download sources. If you find a link on this website that looks
+            wrong, please tell us.
+          </p>
+
+          <h2 id="third-party">5. Third-party services</h2>
+          <p>
+            This website is hosted on GitHub Pages. If a page includes a video, the video player is loaded from YouTube
+            only after you choose to play it. These services are provided by third parties under their own terms. How
+            data is handled is explained in our <a href={privacy}>Privacy Policy</a>.
+          </p>
+
+          <h2 id="accuracy">6. Information on this website</h2>
+          <p>
+            We try to keep information on this website accurate and up to date. Games marked “In Development” or
+            “Demo Available” are not finished, and their features, content, platforms and dates may change before
+            release. Information on this website is not an offer or a contract.
+          </p>
+          <p>
+            The website is provided as it is, and we may change, pause or remove parts of it at any time. To the extent
+            permitted by law, we are not liable for losses resulting from the use of, or inability to use, this
+            website. Nothing in these terms limits rights you have as a consumer that cannot be limited by law.
+          </p>
+
+          <h2 id="changes">7. Changes to these terms</h2>
+          <p>
+            We may update these terms from time to time. The date at the top of this page shows when they last changed.
+            Continuing to use the website after a change means you accept the updated terms.
+          </p>
+
+          <h2 id="contact">8. Contact</h2>
+          <p>
+            Questions about these terms? Email <a href={mail}>{SITE.email}</a>.
+          </p>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <h2 id="about">1. Bu koşullar hakkında</h2>
+          <p>
+            Bu Kullanım Koşulları, Zerquna Studios tarafından işletilen bu web sitesi için geçerlidir. Web sitesini
+            kullanarak bu koşulları kabul etmiş olursunuz. Kabul etmiyorsanız lütfen web sitesini kullanmayın.
+          </p>
+          <p>
+            Bu koşullar <strong>yalnızca web sitesini</strong> kapsar; oyunlarımızın lisansı değildir. Bir Zerquna Studios
+            oyununu satın aldığınızda, indirdiğinizde veya oynadığınızda bunun yerine oyunun kendi lisansı veya son
+            kullanıcı lisans sözleşmesi (EULA) ile oyunu edindiğiniz mağazanın koşulları geçerlidir.
+          </p>
+
+          <h2 id="use">2. Web sitesinin kullanımı</h2>
+          <p>Bu web sitesini kişisel ve ticari olmayan amaçlarla gezebilir ve okuyabilirsiniz. Şunları yapmamayı kabul edersiniz:</p>
+          <ul>
+            <li>web sitesini veya barındırma hizmetini bozmaya, aşırı yüklemeye ya da yetkisiz erişim sağlamaya çalışmak;</li>
+            <li>web sitesini hukuka aykırı amaçlarla veya kötü amaçlı yazılım yaymak için kullanmak;</li>
+            <li>oyunlarımızı, adlarımızı veya materyallerimizi, Zerquna Studios olduğunuzu ya da tarafımızca desteklendiğinizi düşündürecek biçimde sunmak.</li>
+          </ul>
+
+          <h2 id="copyright">3. İçerik ve telif hakları</h2>
+          <p>
+            Aksi belirtilmedikçe metinler, oyun adları, logolar, ekran görüntüleri, çizimler ve videolar dahil bu web
+            sitesinin içeriği Zerquna Studios’a aittir veya izinle kullanılmaktadır ve telif hakkı ile diğer yasalarla
+            korunur. Yazılı iznimiz olmadan bu içeriği ticari amaçla kopyalayamaz, satamaz veya yeniden yayımlayamazsınız.
+          </p>
+          <p>
+            Materyallerimizi oyunlarımızla ilgili içeriklerde kullanmak isteyen basın mensupları ve içerik üreticileri{' '}
+            <a href={localePath(lang, '/contact/#press')}>bizimle iletişime geçebilir</a>.
+          </p>
+          <p>
+            Bu web sitesinde adı geçen Microsoft Store, itch.io, Steam, Unity, Godot ve GitHub gibi diğer şirketlerin ad ve
+            logoları ilgili sahiplerine aittir. Bu adlara yer verilmesi, söz konusu şirketlerin bizi desteklediği anlamına
+            gelmez.
+          </p>
+
+          <h2 id="stores">4. Harici mağaza bağlantıları</h2>
+          <p>
+            Bu web sitesi, oyunlarımızı edinebileceğiniz Microsoft Store ve itch.io gibi harici mağaza ve platformlara
+            bağlantı verir. Bu siteler başka şirketler tarafından işletilir ve kendi koşulları ile gizlilik politikaları
+            vardır. Satın almalar, ödemeler, indirmeler ve iadeler bu mağazalar tarafından kendi kurallarına göre yürütülür.
+            Harici web sitelerinin içeriğinden veya erişilebilirliğinden sorumlu değiliz.
+          </p>
+          <p>
+            Yalnızca resmî mağaza sayfalarına ve indirme kaynaklarına bağlantı veririz. Bu sitede hatalı görünen bir
+            bağlantı bulursanız lütfen bize bildirin.
+          </p>
+
+          <h2 id="third-party">5. Üçüncü taraf hizmetler</h2>
+          <p>
+            Bu web sitesi GitHub Pages üzerinde barındırılmaktadır. Bir sayfada video varsa, video oynatıcı YouTube’dan
+            yalnızca siz oynatmayı seçtiğinizde yüklenir. Bu hizmetler üçüncü taraflarca kendi koşullarına göre sunulur.
+            Verilerin nasıl işlendiği <a href={privacy}>Gizlilik Politikamızda</a> açıklanmıştır.
+          </p>
+
+          <h2 id="accuracy">6. Web sitesindeki bilgiler</h2>
+          <p>
+            Bu web sitesindeki bilgileri doğru ve güncel tutmaya çalışırız. “Geliştiriliyor” veya “Demo Mevcut” olarak
+            işaretlenen oyunlar tamamlanmamıştır; özellikleri, içerikleri, platformları ve tarihleri çıkıştan önce
+            değişebilir. Bu web sitesindeki bilgiler bir teklif veya sözleşme niteliği taşımaz.
+          </p>
+          <p>
+            Web sitesi olduğu gibi sunulur ve herhangi bir bölümünü dilediğimiz zaman değiştirebilir, durdurabilir veya
+            kaldırabiliriz. Yasaların izin verdiği ölçüde, bu web sitesinin kullanımından veya kullanılamamasından doğan
+            kayıplardan sorumlu değiliz. Bu koşullardaki hiçbir hüküm, yasa gereği sınırlanamayan tüketici haklarınızı
+            sınırlamaz.
+          </p>
+
+          <h2 id="changes">7. Koşullardaki değişiklikler</h2>
+          <p>
+            Bu koşulları zaman zaman güncelleyebiliriz. Sayfanın başındaki tarih, son değişikliğin ne zaman yapıldığını
+            gösterir. Bir değişiklikten sonra web sitesini kullanmaya devam etmeniz, güncellenmiş koşulları kabul ettiğiniz
+            anlamına gelir.
+          </p>
+
+          <h2 id="contact">8. İletişim</h2>
+          <p>
+            Bu koşullarla ilgili sorularınız için <a href={mail}>{SITE.email}</a> adresine e-posta gönderin.
+          </p>
+        </Fragment>
+      )
+    }
+  </article>
+</BaseLayout>

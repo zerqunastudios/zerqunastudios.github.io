@@ -1,0 +1,362 @@
+---
+import { getImage } from 'astro:assets';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import GameImg from '../../../components/GameImg.astro';
+import StatusBadge from '../../../components/StatusBadge.astro';
+import Trailer from '../../../components/Trailer.astro';
+import { games, gamePath, supportPath, privacyPath, type Game, type Requirements } from '../../../data/games';
+import { LOCALES, type Locale } from '../../../data/site';
+import { localePath, pick, useTranslations, formatDate, withBase } from '../../../i18n/utils';
+import { getDevlogsFor } from '../../../lib/devlogs';
+
+export function getStaticPaths() {
+  return LOCALES.flatMap((lang) => games.map((game) => ({ params: { lang, slug: game.slug }, props: { game } })));
+}
+
+const { game } = Astro.props as { game: Game };
+const lang = Astro.params.lang as Locale;
+const t = useTranslations(lang);
+const path = gamePath(game);
+const portrait = game.cover.src.height > game.cover.src.width;
+const description = pick(game.description, lang);
+const devlogs = await getDevlogsFor(lang, game.slug);
+
+// Full-size images for the lightbox.
+const shots = await Promise.all(
+  game.screenshots.map(async (s) => ({
+    ...s,
+    full: s.pixelated
+      ? s.src.src
+      : (await getImage({ src: s.src, width: Math.min(1920, s.src.width), format: 'webp' })).src,
+  })),
+);
+
+const reqRows: { key: keyof Requirements; en: string; tr: string }[] = [
+  { key: 'os', en: 'Operating system', tr: 'İşletim sistemi' },
+  { key: 'processor', en: 'Processor', tr: 'İşlemci' },
+  { key: 'memory', en: 'Memory', tr: 'Bellek' },
+  { key: 'graphics', en: 'Graphics', tr: 'Ekran kartı' },
+  { key: 'storage', en: 'Storage', tr: 'Depolama' },
+];
+const testedLabel = {
+  en: 'Developer test system (not official requirements)',
+  tr: 'Geliştirici test sistemi (resmî gereksinim değildir)',
+};
+
+const site = Astro.site!;
+const coverOg = await getImage({ src: game.cover.src, width: 1200, format: 'jpg' });
+const videoGame: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: game.title,
+  description: description[0],
+  url: new URL(localePath(lang, path), site).href,
+  image: new URL(coverOg.src, site).href,
+  genre: pick(game.genre, lang),
+  gamePlatform: game.platforms,
+  operatingSystem: 'Windows',
+  applicationCategory: 'Game',
+  author: { '@id': `${new URL(withBase('/'), site).href}#organization` },
+  publisher: { '@id': `${new URL(withBase('/'), site).href}#organization` },
+};
+if (game.releaseDate) videoGame.datePublished = game.releaseDate;
+if (game.storeLinks.length) videoGame.sameAs = game.storeLinks.map((s) => s.url);
+---
+
+<BaseLayout
+  lang={lang}
+  title={game.title}
+  description={`${pick(game.tagline, lang)} ${description[0]}`.slice(0, 300)}
+  path={path}
+  image={game.cover.src}
+  imageAlt={pick(game.cover.alt, lang)}
+  jsonLd={[videoGame]}
+>
+  <!-- Hero -->
+  <section class="relative isolate overflow-hidden border-b border-line">
+    {
+      !portrait && (
+        <GameImg
+          src={game.cover.src}
+          alt=""
+          pixelated={game.cover.pixelated}
+          widths={[960, 1920]}
+          sizes="100vw"
+          loading="eager"
+          class="absolute inset-0 -z-20 h-full w-full object-cover opacity-30 blur-[2px] scale-105"
+        />
+      )
+    }
+    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-bg/60 via-bg/85 to-bg" aria-hidden="true"></div>
+    <div class="container-site py-10 sm:py-14">
+      <nav aria-label="Breadcrumb" class="text-sm text-muted">
+        <a href={localePath(lang, '/games/')} class="hover:text-text">← {t('game.backToGames')}</a>
+      </nav>
+      <div class="mt-6 grid items-center gap-8 lg:grid-cols-[1.25fr_1fr]">
+        <div class="card relative order-2 aspect-video overflow-hidden lg:order-1">
+          {portrait && <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#2a3242_0%,#141821_70%)]" aria-hidden="true" />}
+          <GameImg
+            src={game.cover.src}
+            alt={pick(game.cover.alt, lang)}
+            pixelated={game.cover.pixelated}
+            widths={[640, 960, 1280]}
+            sizes="(min-width: 1024px) 55vw, 100vw"
+            loading="eager"
+            fetchpriority="high"
+            class={`relative h-full w-full ${portrait ? 'object-contain' : 'object-cover'}`}
+          />
+        </div>
+        <div class="order-1 lg:order-2">
+          <div class="flex flex-wrap items-center gap-3">
+            <StatusBadge status={game.status} lang={lang} />
+            <span class="text-sm text-muted">{pick(game.genre, lang)}</span>
+          </div>
+          <h1 class="mt-3 text-4xl font-bold sm:text-5xl">{game.title}</h1>
+          <p class="mt-3 text-lg text-muted">{pick(game.tagline, lang)}</p>
+          <div class="mt-7 flex flex-wrap gap-3">
+            {
+              game.storeLinks.map((s) => (
+                <a href={s.url} class="btn btn-primary" rel="noopener noreferrer" target="_blank">
+                  {s.store} <span class="sr-only">({t('common.external')})</span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              ))
+            }
+            <a href={localePath(lang, supportPath(game))} class="btn btn-ghost">{t('game.support')}</a>
+          </div>
+          {game.storeLinks.length === 0 && <p class="mt-4 text-sm text-muted">{t('game.storesNone')}</p>}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container-site mt-12 grid gap-12 lg:grid-cols-[1fr_20rem]">
+    <div class="min-w-0 space-y-14">
+      <!-- Overview -->
+      <section aria-labelledby="overview">
+        <h2 id="overview" class="section-title">{t('game.overview')}</h2>
+        <div class="mt-4 space-y-4 text-base leading-relaxed text-[#d9dce3]">
+          {description.map((p) => <p>{p}</p>)}
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section aria-labelledby="features">
+        <h2 id="features" class="section-title">{t('game.features')}</h2>
+        <ul class="mt-5 grid gap-3 sm:grid-cols-2">
+          {
+            pick(game.features, lang).map((f) => (
+              <li class="card flex gap-3 p-4 text-sm">
+                <span class="mt-1.5 h-2 w-2 shrink-0 rotate-45 bg-accent" aria-hidden="true" />
+                <span>{f}</span>
+              </li>
+            ))
+          }
+        </ul>
+        {game.featuresNote && <p class="mt-4 text-sm text-muted">{pick(game.featuresNote, lang)}</p>}
+      </section>
+
+      <!-- Screenshots -->
+      <section aria-labelledby="screenshots">
+        <h2 id="screenshots" class="section-title">{t('game.screenshots')}</h2>
+        {
+          shots.length > 0 ? (
+            <ul class="mt-5 grid gap-4 sm:grid-cols-2">
+              {shots.map((s) => (
+                <li>
+                  <a
+                    href={s.full}
+                    class="card group block overflow-hidden"
+                    data-lightbox
+                    data-alt={pick(s.alt, lang)}
+                    data-pixelated={s.pixelated ? 'true' : undefined}
+                  >
+                    <GameImg
+                      src={s.src}
+                      alt={pick(s.alt, lang)}
+                      pixelated={s.pixelated}
+                      widths={[480, 800]}
+                      sizes="(min-width: 640px) 40vw, 100vw"
+                      class="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="mt-4 text-muted">{t('game.screenshotsNone')}</p>
+          )
+        }
+        {game.mediaNote && <p class="mt-4 text-sm text-muted">{pick(game.mediaNote, lang)}</p>}
+      </section>
+
+      <!-- Trailer -->
+      <section aria-labelledby="trailer">
+        <h2 id="trailer" class="section-title">{t('game.trailer')}</h2>
+        <div class="mt-5">
+          {
+            game.trailerYouTubeId ? (
+              <Trailer videoId={game.trailerYouTubeId} title={`${game.title} — ${t('game.trailer')}`} lang={lang} />
+            ) : (
+              <p class="text-muted">{t('game.trailerNone')}</p>
+            )
+          }
+        </div>
+      </section>
+
+      <!-- System requirements -->
+      <section aria-labelledby="requirements">
+        <h2 id="requirements" class="section-title">{t('game.requirements')}</h2>
+        {
+          game.requirements ? (
+            <div class="mt-5 grid gap-4 md:grid-cols-2">
+              {(['minimum', 'recommended'] as const).map(
+                (tier) =>
+                  game.requirements?.[tier] && (
+                    <div class="card p-5">
+                      <h3 class="font-bold">{t(tier === 'minimum' ? 'game.minimum' : 'game.recommended')}</h3>
+                      <dl class="mt-3 space-y-2 text-sm">
+                        {reqRows.map(
+                          (r) =>
+                            game.requirements?.[tier]?.[r.key] && (
+                              <div>
+                                <dt class="text-muted">{r[lang]}</dt>
+                                <dd>{game.requirements?.[tier]?.[r.key]}</dd>
+                              </div>
+                            ),
+                        )}
+                      </dl>
+                    </div>
+                  ),
+              )}
+            </div>
+          ) : (
+            <p class="mt-4 text-muted">{t('game.requirementsNone')}</p>
+          )
+        }
+        {
+          game.testedOn && (
+            <p class="mt-4 text-sm text-muted">
+              <span class="font-semibold text-text/80">{testedLabel[lang]}:</span> {game.testedOn}
+            </p>
+          )
+        }
+      </section>
+
+      {
+        devlogs.length > 0 && (
+          <section aria-labelledby="game-devlogs">
+            <h2 id="game-devlogs" class="section-title">{t('game.devlogs')}</h2>
+            <ul class="mt-5 space-y-3">
+              {devlogs.map((d) => (
+                <li>
+                  <a href={localePath(lang, `/devlogs/${d.slug}/`)} class="link">{d.entry.data.title}</a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
+      <div class="card p-5">
+        <dl class="space-y-4 text-sm">
+          <div>
+            <dt class="text-muted">{t('game.genre')}</dt>
+            <dd class="mt-0.5 font-medium">{pick(game.genre, lang)}</dd>
+          </div>
+          <div>
+            <dt class="text-muted">{t('game.platform')}</dt>
+            <dd class="mt-0.5 font-medium">{game.platforms.join(', ')}</dd>
+          </div>
+          <div>
+            <dt class="text-muted">{t('game.status')}</dt>
+            <dd class="mt-1"><StatusBadge status={game.status} lang={lang} /></dd>
+          </div>
+          <div>
+            <dt class="text-muted">{t('game.engine')}</dt>
+            <dd class="mt-0.5 font-medium">{game.engine}</dd>
+          </div>
+          {
+            (game.releaseDate || game.status === 'in-development') && (
+              <div>
+                <dt class="text-muted">{t('game.release')}</dt>
+                <dd class="mt-0.5 font-medium">
+                  {game.releaseDate ? formatDate(game.releaseDate, lang) : t('game.releaseTBA')}
+                </dd>
+              </div>
+            )
+          }
+        </dl>
+      </div>
+
+      <div class="card p-5">
+        <h2 class="font-bold">{t('game.stores')}</h2>
+        {
+          game.storeLinks.length > 0 ? (
+            <ul class="mt-3 space-y-2">
+              {game.storeLinks.map((s) => (
+                <li>
+                  <a href={s.url} class="link text-sm" rel="noopener noreferrer" target="_blank">
+                    {s.store} <span class="sr-only">({t('common.external')})</span>↗
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="mt-2 text-sm text-muted">{t('game.storesNone')}</p>
+          )
+        }
+      </div>
+
+      <div class="card p-5">
+        <h2 class="font-bold">{t('game.support')}</h2>
+        <p class="mt-2 text-sm text-muted">{t('game.supportText')}</p>
+        <a href={localePath(lang, supportPath(game))} class="mt-3 inline-block text-sm link">{t('game.supportLink')}</a>
+      </div>
+
+      <div class="card p-5">
+        <h2 class="font-bold">{t('game.privacy')}</h2>
+        <p class="mt-2 text-sm text-muted">{t('game.privacyText')}</p>
+        <a href={localePath(lang, `${privacyPath(game)}#game-${game.slug}`)} class="mt-3 inline-block text-sm link">
+          {t('game.privacyLink')}
+        </a>
+      </div>
+    </aside>
+  </div>
+
+  <dialog
+    class="m-auto max-h-[92vh] max-w-[min(92vw,1600px)] bg-transparent p-0 backdrop:bg-black/85"
+    data-lightbox-dialog
+    aria-label={t('game.screenshots')}
+  >
+    <form method="dialog" class="relative">
+      <img src="" alt="" class="max-h-[88vh] w-auto rounded-lg" data-lightbox-img />
+      <button
+        class="absolute right-3 top-3 rounded-full bg-bg/80 px-3 py-1.5 text-sm font-semibold text-text"
+        aria-label={t('nav.close')}>✕</button
+      >
+    </form>
+  </dialog>
+</BaseLayout>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox-dialog]');
+  const img = document.querySelector<HTMLImageElement>('[data-lightbox-img]');
+  if (dialog && img && typeof dialog.showModal === 'function') {
+    document.querySelectorAll<HTMLAnchorElement>('[data-lightbox]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        img.src = a.href;
+        img.alt = a.dataset.alt ?? '';
+        img.classList.toggle('pixelated', a.dataset.pixelated === 'true');
+        dialog.showModal();
+      });
+    });
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+  }
+</script>

@@ -1,0 +1,749 @@
+---
+/**
+ * CENTRAL PRIVACY POLICY — used by every Zerquna Studios game.
+ * English is the reference version. Keep the Turkish text in sync.
+ * When you change this page, update SITE.privacyPolicyUpdated in src/data/site.ts.
+ * Per-game details come from the `privacy` field of each game in src/data/games.ts.
+ * Open questions are tracked in PRIVACY_REVIEW.md at the project root.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { games, gamePath, supportPath, privacyPath } from '../../data/games';
+import { SITE, type Locale } from '../../data/site';
+import { getLangStaticPaths, localePath, pick, formatDate, useTranslations } from '../../i18n/utils';
+
+export const getStaticPaths = getLangStaticPaths;
+const lang = Astro.params.lang as Locale;
+const t = useTranslations(lang);
+const updated = formatDate(SITE.privacyPolicyUpdated, lang);
+const covered = games.filter((g) => privacyPath(g) === '/privacy-policy/');
+const mail = `mailto:${SITE.email}`;
+
+const toc = {
+  en: [
+    ['introduction', '1. Introduction'],
+    ['scope', '2. Scope'],
+    ['information-collection', '3. Information Collection'],
+    ['local-game-data', '4. Local Game Data'],
+    ['third-party-services', '5. Third-Party Services'],
+    ['data-sharing', '6. Data Sharing'],
+    ['childrens-privacy', '7. Children’s Privacy'],
+    ['data-security', '8. Data Security'],
+    ['data-retention', '9. Data Retention'],
+    ['user-rights', '10. User Rights'],
+    ['policy-updates', '11. Policy Updates'],
+    ['contact', '12. Contact Information'],
+  ],
+  tr: [
+    ['introduction', '1. Giriş'],
+    ['scope', '2. Kapsam'],
+    ['information-collection', '3. Toplanan Bilgiler'],
+    ['local-game-data', '4. Yerel Oyun Verileri'],
+    ['third-party-services', '5. Üçüncü Taraf Hizmetler'],
+    ['data-sharing', '6. Veri Paylaşımı'],
+    ['childrens-privacy', '7. Çocukların Gizliliği'],
+    ['data-security', '8. Veri Güvenliği'],
+    ['data-retention', '9. Verilerin Saklanması'],
+    ['user-rights', '10. Kullanıcı Hakları'],
+    ['policy-updates', '11. Politika Güncellemeleri'],
+    ['contact', '12. İletişim Bilgileri'],
+  ],
+}[lang];
+
+// Extensible third-party table. Only mark a service "in use" when it really is.
+type Use = 'used' | 'conditional' | 'not-used';
+const services: { name: string; use: Use; what: Record<Locale, string>; link?: string }[] = [
+  {
+    name: 'itch.io',
+    use: 'used',
+    what: {
+      en: 'Store and download platform used to distribute some of our games (currently SpinCraft). itch.io processes your account, purchase and download data under its own privacy policy.',
+      tr: 'Bazı oyunlarımızı (şu anda SpinCraft) dağıtmak için kullanılan mağaza ve indirme platformu. itch.io; hesap, satın alma ve indirme verilerinizi kendi gizlilik politikasına göre işler.',
+    },
+    link: 'https://itch.io/docs/legal/privacy-policy',
+  },
+  {
+    name: 'Microsoft Store',
+    use: 'conditional',
+    what: {
+      en: 'Used when a game is distributed through Microsoft Store. Microsoft processes your Microsoft account, purchase, download and installation data under the Microsoft Privacy Statement.',
+      tr: 'Bir oyun Microsoft Store üzerinden dağıtıldığında kullanılır. Microsoft; Microsoft hesabı, satın alma, indirme ve kurulum verilerinizi Microsoft Gizlilik Bildirimi’ne göre işler.',
+    },
+    link: 'https://privacy.microsoft.com/privacystatement',
+  },
+  {
+    name: 'Steam',
+    use: 'not-used',
+    what: {
+      en: 'Not currently used. If we release a game on Steam, this policy will be updated first.',
+      tr: 'Şu anda kullanılmıyor. Bir oyunu Steam’de yayımlarsak bu politika önce güncellenecektir.',
+    },
+  },
+  {
+    name: 'Unity Technologies',
+    use: 'used',
+    what: {
+      en: 'Maker of the Unity engine used by SpinCraft, SpinCraft 2: Creative and Echoes of the Earth. The engine may send limited technical device information to Unity (see section 5.1).',
+      tr: 'SpinCraft, SpinCraft 2: Creative ve Echoes of the Earth’te kullanılan Unity motorunun üreticisi. Motor, cihazınız hakkında sınırlı teknik bilgileri Unity’ye gönderebilir (bkz. bölüm 5.1).',
+    },
+    link: 'https://unity.com/legal/privacy-policy',
+  },
+  {
+    name: 'GitHub (GitHub Pages)',
+    use: 'used',
+    what: {
+      en: 'Hosts this website. GitHub may log technical data such as your IP address when you visit, for security and to operate the service.',
+      tr: 'Bu web sitesini barındırır. GitHub, siteyi ziyaret ettiğinizde güvenlik ve hizmetin işletilmesi amacıyla IP adresiniz gibi teknik verileri kaydedebilir.',
+    },
+    link: 'https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement',
+  },
+  {
+    name: 'Google (Gmail)',
+    use: 'used',
+    what: {
+      en: 'Our email provider. Messages you send to our address are stored in our Gmail account.',
+      tr: 'E-posta sağlayıcımız. Adresimize gönderdiğiniz mesajlar Gmail hesabımızda saklanır.',
+    },
+    link: 'https://policies.google.com/privacy',
+  },
+  {
+    name: { en: 'Analytics services', tr: 'Analiz hizmetleri' }[lang],
+    use: 'not-used',
+    what: {
+      en: 'Not used in our games or on this website.',
+      tr: 'Oyunlarımızda veya bu web sitesinde kullanılmıyor.',
+    },
+  },
+  {
+    name: { en: 'Crash reporting services', tr: 'Çökme raporlama hizmetleri' }[lang],
+    use: 'not-used',
+    what: {
+      en: 'Not used. Crash and log files stay on your PC unless you send them to us.',
+      tr: 'Kullanılmıyor. Çökme ve günlük dosyaları, siz bize göndermedikçe bilgisayarınızda kalır.',
+    },
+  },
+  {
+    name: { en: 'Advertising networks', tr: 'Reklam ağları' }[lang],
+    use: 'not-used',
+    what: {
+      en: 'Not used. Our games and website contain no ads.',
+      tr: 'Kullanılmıyor. Oyunlarımızda ve web sitemizde reklam yoktur.',
+    },
+  },
+];
+const useLabel: Record<Use, Record<Locale, string>> = {
+  used: { en: 'In use', tr: 'Kullanılıyor' },
+  conditional: { en: 'When applicable', tr: 'Gerektiğinde' },
+  'not-used': { en: 'Not used', tr: 'Kullanılmıyor' },
+};
+const useStyle: Record<Use, string> = {
+  used: 'text-ok',
+  conditional: 'text-warn',
+  'not-used': 'text-muted',
+};
+const extLabel = t('common.external');
+const colService = lang === 'en' ? 'Service' : 'Hizmet';
+const colStatus = lang === 'en' ? 'Status' : 'Durum';
+const colRole = lang === 'en' ? 'Role and data' : 'Rolü ve veriler';
+---
+
+<BaseLayout
+  lang={lang}
+  title={t('footer.privacy')}
+  description={lang === 'en'
+    ? 'Privacy Policy for Zerquna Studios games and website: what data our games store, what we receive, third-party services and your rights.'
+    : 'Zerquna Studios oyunları ve web sitesi için Gizlilik Politikası: oyunlarımızın sakladığı veriler, aldığımız bilgiler, üçüncü taraf hizmetler ve haklarınız.'}
+  path="/privacy-policy/"
+>
+  <section class="border-b border-line">
+    <div class="container-site py-14 sm:py-20">
+      <p class="eyebrow">{t('footer.legal')}</p>
+      <h1 class="mt-2 text-3xl font-bold sm:text-5xl">{t('footer.privacy')}</h1>
+      <p class="mt-4 text-muted">
+        {t('common.lastUpdated')}: <time datetime={SITE.privacyPolicyUpdated}>{updated}</time>
+      </p>
+      {
+        lang === 'tr' && (
+          <p class="mt-4 max-w-2xl rounded-lg border border-line bg-bg-2 p-4 text-sm text-muted">
+            Bu politikanın esas metni İngilizcedir. Türkçe çeviri aynı bilgileri yansıtmak amacıyla sunulmuştur; iki metin
+            arasında fark olması hâlinde{' '}
+            <a href={localePath('en', '/privacy-policy/')} hreflang="en" class="link">
+              İngilizce sürüm
+            </a>{' '}
+            esas alınır.
+          </p>
+        )
+      }
+    </div>
+  </section>
+
+  <div class="container-site mt-10 grid gap-12 lg:grid-cols-[16rem_1fr]">
+    <nav aria-labelledby="toc-title" class="lg:sticky lg:top-24 lg:self-start">
+      <h2 id="toc-title" class="text-xs font-bold uppercase tracking-[0.14em] text-muted">{t('common.onThisPage')}</h2>
+      <ol class="mt-3 space-y-1.5 text-sm">
+        {
+          toc.map(([id, label]) => (
+            <li>
+              <a href={`#${id}`} class="text-muted hover:text-text">
+                {label}
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <article class="prose-site min-w-0">
+      {
+        lang === 'en' ? (
+          <Fragment>
+            <h2 id="introduction">1. Introduction</h2>
+            <p>
+              Zerquna Studios (“we”, “us”) is an independent game developer. This Privacy Policy explains what
+              information our games and this website handle, why, and what choices you have. We wrote it to describe
+              what our games actually do, not to cover things they do not do.
+            </p>
+            <p>
+              <strong>In short:</strong> our games have no accounts, online features, ads or analytics. Your game
+              progress is saved on your own PC. We only receive personal information when you choose to contact us,
+              for example by email. Stores you use to get our games, and the game engines we build with, have their
+              own privacy practices, described below.
+            </p>
+
+            <h2 id="scope">2. Scope</h2>
+            <p>This policy applies to the following Zerquna Studios games:</p>
+            <ul>
+              {covered.map((g) => (
+                <li>
+                  <a href={localePath(lang, gamePath(g))}>{g.title}</a> ({pick(g.genre, lang)}, {g.platforms.join(', ')})
+                </li>
+              ))}
+            </ul>
+            <p>
+              It also applies to this website and to communication with us by email. When we release a new game, we
+              add it to this list. If a game ever handles data differently from what is described here, we will
+              describe the difference in its own section below or publish a separate privacy policy for that game,
+              and link to it from the game’s page.
+            </p>
+            <p>
+              This policy does not cover the stores and platforms you use to buy or download our games (such as
+              Microsoft Store or itch.io). Their own privacy policies apply to them.
+            </p>
+
+            <h2 id="information-collection">3. Information Collection</h2>
+            <h3>3.1 Information our games collect</h3>
+            <p>
+              Our games do not ask for your name, email address or other contact details, and they have no player
+              accounts. Their own code does not send personal information to us or to anyone else over the internet.
+              Game data, such as save files and settings, is stored locally on your PC (see section 4).
+            </p>
+            <p>
+              The Unity engine used by some of our games may send limited technical device information directly to
+              Unity Technologies. We do not receive this data. See section 5.1 for details.
+            </p>
+            <h3>3.2 Information processed by stores and platforms</h3>
+            <p>
+              When you buy, download or install one of our games through a store such as Microsoft Store or itch.io,
+              that store processes your account, payment and download information as an independent company under its
+              own privacy policy. We do not receive your payment card details. Stores may give developers reports about
+              sales and downloads. If a store shares personal information about you with us, for example to handle a
+              refund or support request, we use it only for that purpose.
+            </p>
+            <h3>3.3 Information you send us</h3>
+            <p>
+              If you email us, we receive your email address, your name if you include it, the content of your message
+              and any attachments you choose to send, such as screenshots, log files or details about your PC. We use
+              this information only to answer you, help with your problem, fix bugs and improve our games. The legal
+              basis for this is our legitimate interest in responding to your request and supporting our games, or the
+              steps you ask us to take.
+            </p>
+            <p>
+              Log files can contain technical details about your PC (such as hardware, driver and Windows versions) and
+              file paths that may include your Windows user name. Please look at a file before you send it, and only
+              send what you are comfortable sharing.
+            </p>
+            <h3>3.4 This website</h3>
+            <p>
+              This website does not use cookies, analytics, advertising, tracking pixels, contact forms or user
+              accounts, and it does not load fonts or scripts from third-party servers. It is hosted on GitHub Pages.
+              When you visit, GitHub may automatically log technical information such as your IP address, for security
+              and to operate the service (see section 5). If we add a video to a game page, the video player loads from
+              YouTube’s privacy-enhanced domain only after you press play.
+            </p>
+
+            <h2 id="local-game-data">4. Local Game Data</h2>
+            <p>
+              Our games save data in files and settings on your own PC. This data stays on your device. We cannot see
+              it, and it is not sent to us. Each game stores different data, so it is described per game below. The
+              exact file locations are listed on each game’s support page.
+            </p>
+            <p>
+              You can delete this data at any time by deleting the save files and settings listed for the game, or by
+              uninstalling the game and removing those folders. Deleting save files permanently removes your progress.
+            </p>
+            {covered.map((g) => (
+              <section id={`game-${g.slug}`} aria-labelledby={`game-${g.slug}-title`}>
+                <h3 id={`game-${g.slug}-title`}>{g.title}</h3>
+                <p>
+                  <em>Engine: {g.privacy.engine}</em> ·{' '}
+                  <a href={localePath(lang, supportPath(g))}>Support page and file locations</a>
+                </p>
+                <p>
+                  <strong>Stored on your PC:</strong>
+                </p>
+                <ul>
+                  {pick(g.privacy.localData, lang).map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+                <p>
+                  <strong>Network and third parties:</strong>
+                </p>
+                <ul>
+                  {pick(g.privacy.network, lang).map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+
+            <h2 id="third-party-services">5. Third-Party Services</h2>
+            <p>
+              The table below lists the third-party services involved with our games and this website, and whether we
+              currently use each one. We keep this list up to date as our games change. These companies process data
+              under their own privacy policies.
+            </p>
+          </Fragment>
+        ) : (
+          <Fragment>
+            <h2 id="introduction">1. Giriş</h2>
+            <p>
+              Zerquna Studios (“biz”) bağımsız bir oyun geliştiricisidir. Bu Gizlilik Politikası; oyunlarımızın ve bu web
+              sitesinin hangi bilgileri, neden işlediğini ve sahip olduğunuz seçenekleri açıklar. Bu metni, oyunlarımızın
+              yapmadığı şeyleri değil, gerçekte yaptıklarını anlatmak için hazırladık.
+            </p>
+            <p>
+              <strong>Kısaca:</strong> oyunlarımızda hesap, çevrim içi özellik, reklam veya analiz yoktur. Oyun ilerlemeniz
+              kendi bilgisayarınızda saklanır. Kişisel bilgilerinizi yalnızca bizimle iletişime geçmeyi seçtiğinizde,
+              örneğin e-posta gönderdiğinizde alırız. Oyunlarımızı edindiğiniz mağazaların ve kullandığımız oyun
+              motorlarının kendi gizlilik uygulamaları vardır; bunlar aşağıda açıklanmıştır.
+            </p>
+
+            <h2 id="scope">2. Kapsam</h2>
+            <p>Bu politika aşağıdaki Zerquna Studios oyunları için geçerlidir:</p>
+            <ul>
+              {covered.map((g) => (
+                <li>
+                  <a href={localePath(lang, gamePath(g))}>{g.title}</a> ({pick(g.genre, lang)}, {g.platforms.join(', ')})
+                </li>
+              ))}
+            </ul>
+            <p>
+              Politika ayrıca bu web sitesi ve bizimle e-posta yoluyla yapılan iletişim için de geçerlidir. Yeni bir oyun
+              yayımladığımızda onu bu listeye ekleriz. Bir oyun verileri burada anlatılandan farklı biçimde işlerse, bu
+              farkı aşağıda o oyuna ait bölümde açıklar veya o oyun için ayrı bir gizlilik politikası yayımlayarak oyunun
+              sayfasından bağlantı veririz.
+            </p>
+            <p>
+              Bu politika, oyunlarımızı satın aldığınız veya indirdiğiniz mağaza ve platformları (Microsoft Store veya
+              itch.io gibi) kapsamaz. Bunlar için kendi gizlilik politikaları geçerlidir.
+            </p>
+
+            <h2 id="information-collection">3. Toplanan Bilgiler</h2>
+            <h3>3.1 Oyunlarımızın topladığı bilgiler</h3>
+            <p>
+              Oyunlarımız adınızı, e-posta adresinizi veya başka iletişim bilgilerinizi istemez ve oyuncu hesabı içermez.
+              Oyunların kendi kodu, kişisel bilgileri internet üzerinden bize veya başka birine göndermez. Kayıt dosyaları ve
+              ayarlar gibi oyun verileri bilgisayarınızda yerel olarak saklanır (bkz. bölüm 4).
+            </p>
+            <p>
+              Bazı oyunlarımızda kullanılan Unity motoru, cihazınız hakkında sınırlı teknik bilgileri doğrudan Unity
+              Technologies’e gönderebilir. Bu verileri biz almayız. Ayrıntılar için bölüm 5.1’e bakın.
+            </p>
+            <h3>3.2 Mağaza ve platformların işlediği bilgiler</h3>
+            <p>
+              Oyunlarımızdan birini Microsoft Store veya itch.io gibi bir mağaza üzerinden satın aldığınızda, indirdiğinizde
+              veya kurduğunuzda; hesap, ödeme ve indirme bilgilerinizi o mağaza bağımsız bir şirket olarak kendi gizlilik
+              politikasına göre işler. Ödeme kartı bilgilerinizi almayız. Mağazalar geliştiricilere satış ve indirme
+              raporları sunabilir. Bir mağaza sizinle ilgili kişisel bir bilgiyi bizimle paylaşırsa (örneğin bir iade veya
+              destek talebini çözmek için), bu bilgiyi yalnızca o amaçla kullanırız.
+            </p>
+            <h3>3.3 Bize gönderdiğiniz bilgiler</h3>
+            <p>
+              Bize e-posta gönderdiğinizde e-posta adresinizi, eklediyseniz adınızı, mesajınızın içeriğini ve göndermeyi
+              seçtiğiniz ekleri (ekran görüntüleri, günlük dosyaları veya bilgisayarınıza ait ayrıntılar gibi) alırız. Bu
+              bilgileri yalnızca size yanıt vermek, sorununuza yardımcı olmak, hataları düzeltmek ve oyunlarımızı
+              geliştirmek için kullanırız. Bunun hukuki dayanağı, talebinize yanıt verme ve oyunlarımıza destek sağlama
+              konusundaki meşru menfaatimiz veya bizden talep ettiğiniz işlemlerin yerine getirilmesidir.
+            </p>
+            <p>
+              Günlük dosyaları bilgisayarınız hakkında teknik ayrıntılar (donanım, sürücü ve Windows sürümleri gibi) ve
+              Windows kullanıcı adınızı içerebilen dosya yolları barındırabilir. Lütfen bir dosyayı göndermeden önce
+              inceleyin ve yalnızca paylaşmaktan rahatsız olmayacağınız bilgileri gönderin.
+            </p>
+            <h3>3.4 Bu web sitesi</h3>
+            <p>
+              Bu web sitesi çerez, analiz, reklam, izleme pikseli, iletişim formu veya kullanıcı hesabı kullanmaz;
+              yazı tiplerini veya betikleri üçüncü taraf sunuculardan yüklemez. Site GitHub Pages üzerinde barındırılır.
+              Siteyi ziyaret ettiğinizde GitHub, güvenlik ve hizmetin işletilmesi amacıyla IP adresiniz gibi teknik
+              bilgileri otomatik olarak kaydedebilir (bkz. bölüm 5). Bir oyun sayfasına video eklersek, video oynatıcı
+              YouTube’un gizlilik odaklı alan adından yalnızca siz oynat düğmesine bastığınızda yüklenir.
+            </p>
+
+            <h2 id="local-game-data">4. Yerel Oyun Verileri</h2>
+            <p>
+              Oyunlarımız verileri kendi bilgisayarınızdaki dosyalara ve ayarlara kaydeder. Bu veriler cihazınızda kalır;
+              biz bunları göremeyiz ve bize gönderilmez. Her oyun farklı veriler sakladığı için aşağıda oyun bazında
+              açıklanmıştır. Dosyaların tam konumları her oyunun destek sayfasında yer alır.
+            </p>
+            <p>
+              Bu verileri, ilgili oyun için listelenen kayıt dosyalarını ve ayarları silerek veya oyunu kaldırıp bu
+              klasörleri silerek dilediğiniz zaman silebilirsiniz. Kayıt dosyalarını silmek ilerlemenizi kalıcı olarak
+              siler.
+            </p>
+            {covered.map((g) => (
+              <section id={`game-${g.slug}`} aria-labelledby={`game-${g.slug}-title`}>
+                <h3 id={`game-${g.slug}-title`}>{g.title}</h3>
+                <p>
+                  <em>Motor: {g.privacy.engine}</em> ·{' '}
+                  <a href={localePath(lang, supportPath(g))}>Destek sayfası ve dosya konumları</a>
+                </p>
+                <p>
+                  <strong>Bilgisayarınızda saklananlar:</strong>
+                </p>
+                <ul>
+                  {pick(g.privacy.localData, lang).map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+                <p>
+                  <strong>Ağ ve üçüncü taraflar:</strong>
+                </p>
+                <ul>
+                  {pick(g.privacy.network, lang).map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+
+            <h2 id="third-party-services">5. Üçüncü Taraf Hizmetler</h2>
+            <p>
+              Aşağıdaki tablo, oyunlarımız ve bu web sitesiyle ilgili üçüncü taraf hizmetleri ve her birini şu anda
+              kullanıp kullanmadığımızı gösterir. Oyunlarımız değiştikçe bu listeyi güncel tutarız. Bu şirketler verileri
+              kendi gizlilik politikalarına göre işler.
+            </p>
+          </Fragment>
+        )
+      }
+
+      <div class="sm:overflow-x-auto">
+        <table class="stack-table">
+          <thead>
+            <tr>
+              <th scope="col">{colService}</th>
+              <th scope="col">{colStatus}</th>
+              <th scope="col">{colRole}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              services.map((s) => (
+                <tr>
+                  <td data-label={colService}>
+                    {s.link ? (
+                      <a href={s.link} rel="noopener noreferrer" target="_blank">
+                        {s.name}
+                        <span class="sr-only"> ({extLabel})</span>
+                      </a>
+                    ) : (
+                      s.name
+                    )}
+                  </td>
+                  <td data-label={colStatus} class:list={['whitespace-nowrap font-semibold', useStyle[s.use]]}>
+                    {useLabel[s.use][lang]}
+                  </td>
+                  <td data-label={colRole}>{s.what[lang]}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+
+      {
+        lang === 'en' ? (
+          <Fragment>
+            <h3 id="unity">5.1 Unity engine</h3>
+            <p>
+              SpinCraft, SpinCraft 2: Creative and Echoes of the Earth are built with the Unity engine. We have switched
+              off Unity Analytics, Unity Cloud Diagnostics (crash reporting) and Unity Performance Reporting, and these
+              projects are not linked to Unity Cloud. However, in the current build configuration, Unity’s engine-level
+              hardware statistics option is enabled. This may allow the Unity engine to send limited technical
+              information about your device, such as operating system, processor, graphics card and memory, to Unity
+              Technologies. Zerquna Studios does not receive this information. Unity processes it under the{' '}
+              <a href="https://unity.com/legal/privacy-policy" rel="noopener noreferrer" target="_blank">
+                Unity Privacy Policy<span class="sr-only"> ({extLabel})</span>
+              </a>
+              . Dead Sector: Outbreak is built with the Godot engine, which does not include any telemetry.
+            </p>
+
+            <h2 id="data-sharing">6. Data Sharing</h2>
+            <p>
+              We do not sell, rent or trade personal information, and we do not share it with advertisers or data
+              brokers. We only share personal information in these cases:
+            </p>
+            <ul>
+              <li>
+                <strong>Service providers</strong> that process data as part of the services listed in section 5, for
+                example our email provider storing messages you send us.
+              </li>
+              <li>
+                <strong>Legal requirements:</strong> when we are required to by law, court order or a valid request
+                from a public authority.
+              </li>
+              <li>
+                <strong>Protection:</strong> when it is necessary to protect our rights, our players or others, for
+                example to investigate fraud or abuse.
+              </li>
+              <li>
+                <strong>With your consent:</strong> in any other case, only if you clearly agree first.
+              </li>
+            </ul>
+            <p>
+              Some of these providers (such as Google, GitHub, Microsoft and Unity) are based in, or process data in,
+              other countries including the United States. When this happens, they are responsible for protecting the
+              data under their own privacy commitments.
+            </p>
+
+            <h2 id="childrens-privacy">7. Children’s Privacy</h2>
+            <p>
+              Our games do not ask for or collect personal information from players of any age, including children. We
+              do not knowingly collect personal information from children under 13, or under the minimum age set by the
+              law of their country. If you believe a child has sent us personal information, for example by email,
+              please contact us and we will delete it.
+            </p>
+            <p>
+              Age ratings for our games are set on each store page. Please check the store page to see whether a game is
+              suitable for a child.
+            </p>
+
+            <h2 id="data-security">8. Data Security</h2>
+            <p>We keep the amount of personal information we hold as small as possible, and protect it as follows:</p>
+            <ul>
+              <li>
+                Our games do not transmit personal information, and we do not run game servers or player databases, so
+                there is no player database that could be breached.
+              </li>
+              <li>Game data stays on your PC, protected by your own Windows user account.</li>
+              <li>This website is static, collects no data, and is served over encrypted HTTPS connections.</li>
+              <li>
+                Support emails are kept in our email account, which only Zerquna Studios can access, protected by the
+                security features of our email provider.
+              </li>
+            </ul>
+            <p>
+              No method of storage or transmission is completely secure, but we will tell affected people and the
+              authorities about a data breach where the law requires it.
+            </p>
+
+            <h2 id="data-retention">9. Data Retention</h2>
+            <ul>
+              <li>
+                <strong>Local game data</strong> stays on your PC until you delete it. We never have a copy.
+              </li>
+              <li>
+                <strong>Emails and attachments</strong> are kept only as long as needed to resolve your request and handle
+                reasonable follow-up questions, and are then deleted. You can ask us to delete your messages at any time.
+              </li>
+              <li>
+                <strong>Data held by stores, Unity and GitHub</strong> is kept according to their own retention policies.
+              </li>
+            </ul>
+
+            <h2 id="user-rights">10. User Rights</h2>
+            <p>
+              Depending on where you live, you may have rights over your personal information. For example, under the
+              EU and UK General Data Protection Regulation (GDPR) and Turkey’s Personal Data Protection Law No. 6698
+              (KVKK), you may have the right to:
+            </p>
+            <ul>
+              <li>find out whether we hold personal information about you and get a copy of it;</li>
+              <li>have incorrect information corrected;</li>
+              <li>have your information deleted;</li>
+              <li>object to or restrict how we use your information;</li>
+              <li>receive your information in a portable format, where applicable;</li>
+              <li>withdraw consent at any time, where we rely on consent;</li>
+              <li>complain to your local data protection authority (in Turkey, the Personal Data Protection Authority, KVKK).</li>
+            </ul>
+            <p>
+              To use any of these rights, email us at <a href={mail}>{SITE.email}</a>. We will reply within the time
+              required by applicable law (for example, within one month under the GDPR and within 30 days under KVKK).
+              We may ask for information to confirm that a request comes from you. Exercising your rights is free of
+              charge.
+            </p>
+            <p>
+              Because local game data never reaches us, you control it directly on your PC (see section 4). For data
+              held by Microsoft, itch.io, Unity, GitHub or Google, please use the privacy tools or contact details of
+              that company, as listed in their privacy policies.
+            </p>
+
+            <h2 id="policy-updates">11. Policy Updates</h2>
+            <p>
+              We update this policy when our games, the services we use, or the law change, and before we add any
+              feature that would collect personal information. The date of the latest change is shown at the top of
+              this page. If we make an important change, we will also describe it at the top of this page. This page
+              always shows the current version.
+            </p>
+
+            <h2 id="contact">12. Contact Information</h2>
+            <p>If you have questions about this policy or your personal information, contact us:</p>
+            <p>
+              <strong>Zerquna Studios</strong>
+              <br />
+              Email: <a href={mail}>{SITE.email}</a>
+            </p>
+          </Fragment>
+        ) : (
+          <Fragment>
+            <h3 id="unity">5.1 Unity motoru</h3>
+            <p>
+              SpinCraft, SpinCraft 2: Creative ve Echoes of the Earth, Unity motoruyla geliştirilmiştir. Unity Analytics,
+              Unity Cloud Diagnostics (çökme raporlama) ve Unity Performance Reporting özelliklerini kapattık; bu projeler
+              Unity Cloud’a bağlı değildir. Ancak mevcut derleme yapılandırmasında Unity’nin motor düzeyindeki donanım
+              istatistikleri seçeneği açıktır. Bu seçenek, Unity motorunun cihazınız hakkında işletim sistemi, işlemci,
+              ekran kartı ve bellek gibi sınırlı teknik bilgileri Unity Technologies’e göndermesine izin verebilir.
+              Zerquna Studios bu bilgileri almaz. Unity bu bilgileri{' '}
+              <a href="https://unity.com/legal/privacy-policy" rel="noopener noreferrer" target="_blank">
+                Unity Gizlilik Politikası<span class="sr-only"> ({extLabel})</span>
+              </a>
+              ’na göre işler. Dead Sector: Outbreak ise herhangi bir telemetri içermeyen Godot motoruyla geliştirilmiştir.
+            </p>
+
+            <h2 id="data-sharing">6. Veri Paylaşımı</h2>
+            <p>
+              Kişisel bilgileri satmayız, kiralamayız veya takas etmeyiz; reklamverenlerle ya da veri simsarlarıyla
+              paylaşmayız. Kişisel bilgileri yalnızca şu durumlarda paylaşırız:
+            </p>
+            <ul>
+              <li>
+                <strong>Hizmet sağlayıcılar:</strong> Bölüm 5’te listelenen hizmetlerin bir parçası olarak verileri
+                işleyen sağlayıcılar; örneğin bize gönderdiğiniz mesajları saklayan e-posta sağlayıcımız.
+              </li>
+              <li>
+                <strong>Yasal zorunluluklar:</strong> kanun, mahkeme kararı veya bir kamu otoritesinin geçerli talebi
+                gerektirdiğinde.
+              </li>
+              <li>
+                <strong>Koruma:</strong> haklarımızı, oyuncularımızı veya başkalarını korumak için gerekli olduğunda;
+                örneğin dolandırıcılık veya kötüye kullanımı incelemek amacıyla.
+              </li>
+              <li>
+                <strong>Onayınızla:</strong> diğer tüm durumlarda yalnızca önceden açıkça onay vermeniz hâlinde.
+              </li>
+            </ul>
+            <p>
+              Bu sağlayıcılardan bazıları (Google, GitHub, Microsoft ve Unity gibi) Amerika Birleşik Devletleri dahil
+              başka ülkelerde bulunur veya verileri bu ülkelerde işler. Bu durumda verilerin korunmasından kendi gizlilik
+              taahhütleri kapsamında bu sağlayıcılar sorumludur.
+            </p>
+
+            <h2 id="childrens-privacy">7. Çocukların Gizliliği</h2>
+            <p>
+              Oyunlarımız, çocuklar dahil hiçbir yaştaki oyuncudan kişisel bilgi istemez veya toplamaz. 13 yaşın altındaki
+              ya da ülkelerinin kanunlarında belirlenen asgari yaşın altındaki çocuklardan bilerek kişisel bilgi
+              toplamayız. Bir çocuğun bize kişisel bilgi gönderdiğini (örneğin e-posta yoluyla) düşünüyorsanız lütfen bizimle
+              iletişime geçin; bu bilgileri sileriz.
+            </p>
+            <p>
+              Oyunlarımızın yaş sınıflandırmaları her mağaza sayfasında belirtilir. Bir oyunun çocuğunuza uygun olup
+              olmadığını görmek için lütfen mağaza sayfasını kontrol edin.
+            </p>
+
+            <h2 id="data-security">8. Veri Güvenliği</h2>
+            <p>Elimizde tuttuğumuz kişisel bilgileri mümkün olduğunca az tutar ve şu şekilde koruruz:</p>
+            <ul>
+              <li>
+                Oyunlarımız kişisel bilgi iletmez; oyun sunucusu veya oyuncu veritabanı işletmeyiz. Bu nedenle ele
+                geçirilebilecek bir oyuncu veritabanı yoktur.
+              </li>
+              <li>Oyun verileri bilgisayarınızda kalır ve kendi Windows kullanıcı hesabınızla korunur.</li>
+              <li>Bu web sitesi statiktir, veri toplamaz ve şifreli HTTPS bağlantıları üzerinden sunulur.</li>
+              <li>
+                Destek e-postaları, yalnızca Zerquna Studios’un erişebildiği ve e-posta sağlayıcımızın güvenlik
+                özellikleriyle korunan e-posta hesabımızda tutulur.
+              </li>
+            </ul>
+            <p>
+              Hiçbir saklama veya iletim yöntemi tamamen güvenli değildir; ancak bir veri ihlali olması hâlinde, kanunun
+              gerektirdiği durumlarda etkilenen kişileri ve yetkili makamları bilgilendiririz.
+            </p>
+
+            <h2 id="data-retention">9. Verilerin Saklanması</h2>
+            <ul>
+              <li>
+                <strong>Yerel oyun verileri</strong>, siz silene kadar bilgisayarınızda kalır. Bizde hiçbir zaman kopyası
+                bulunmaz.
+              </li>
+              <li>
+                <strong>E-postalar ve ekleri</strong>, yalnızca talebinizi çözmek ve makul takip sorularını yanıtlamak için
+                gerektiği süre boyunca saklanır, ardından silinir. Mesajlarınızın silinmesini dilediğiniz zaman
+                isteyebilirsiniz.
+              </li>
+              <li>
+                <strong>Mağazaların, Unity’nin ve GitHub’ın tuttuğu veriler</strong> bu şirketlerin kendi saklama
+                politikalarına göre saklanır.
+              </li>
+            </ul>
+
+            <h2 id="user-rights">10. Kullanıcı Hakları</h2>
+            <p>
+              Yaşadığınız yere bağlı olarak kişisel bilgileriniz üzerinde çeşitli haklarınız olabilir. Örneğin AB ve
+              Birleşik Krallık Genel Veri Koruma Tüzüğü (GDPR) ile 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK)
+              kapsamında şu haklara sahip olabilirsiniz:
+            </p>
+            <ul>
+              <li>hakkınızda kişisel bilgi tutup tutmadığımızı öğrenme ve bunların bir kopyasını alma;</li>
+              <li>yanlış bilgilerin düzeltilmesini isteme;</li>
+              <li>bilgilerinizin silinmesini isteme;</li>
+              <li>bilgilerinizin kullanımına itiraz etme veya kullanımın sınırlandırılmasını isteme;</li>
+              <li>uygulanabildiği durumlarda bilgilerinizi taşınabilir bir biçimde alma;</li>
+              <li>onaya dayandığımız durumlarda onayınızı dilediğiniz zaman geri çekme;</li>
+              <li>yerel veri koruma otoritenize (Türkiye’de Kişisel Verileri Koruma Kurumu) şikâyette bulunma.</li>
+            </ul>
+            <p>
+              Bu haklardan herhangi birini kullanmak için <a href={mail}>{SITE.email}</a> adresine e-posta gönderin.
+              Uygulanacak mevzuatın öngördüğü süre içinde (örneğin GDPR kapsamında bir ay, KVKK kapsamında 30 gün içinde)
+              yanıt veririz. Talebin size ait olduğunu doğrulamak için bilgi isteyebiliriz. Haklarınızı kullanmak
+              ücretsizdir.
+            </p>
+            <p>
+              Yerel oyun verileri bize hiçbir zaman ulaşmadığı için bunları doğrudan kendi bilgisayarınızda yönetirsiniz
+              (bkz. bölüm 4). Microsoft, itch.io, Unity, GitHub veya Google’ın tuttuğu veriler için lütfen ilgili şirketin
+              gizlilik politikasında belirtilen gizlilik araçlarını veya iletişim bilgilerini kullanın.
+            </p>
+
+            <h2 id="policy-updates">11. Politika Güncellemeleri</h2>
+            <p>
+              Oyunlarımız, kullandığımız hizmetler veya mevzuat değiştiğinde ve kişisel bilgi toplayacak herhangi bir
+              özellik eklemeden önce bu politikayı güncelleriz. Son değişikliğin tarihi bu sayfanın başında gösterilir.
+              Önemli bir değişiklik yaparsak bunu ayrıca sayfanın başında açıklarız. Bu sayfa her zaman güncel sürümü
+              gösterir.
+            </p>
+
+            <h2 id="contact">12. İletişim Bilgileri</h2>
+            <p>Bu politika veya kişisel bilgileriniz hakkında sorularınız için bizimle iletişime geçin:</p>
+            <p>
+              <strong>Zerquna Studios</strong>
+              <br />
+              E-posta: <a href={mail}>{SITE.email}</a>
+            </p>
+          </Fragment>
+        )
+      }
+
+      <p class="!mt-12 text-sm text-muted">
+        <a href="#main">↑ {t('common.backToTop')}</a>
+      </p>
+    </article>
+  </div>
+</BaseLayout>

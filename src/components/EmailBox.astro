@@ -1,0 +1,57 @@
+---
+import { SITE, type Locale } from '../data/site';
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+  lang: Locale;
+  subject?: string;
+  body?: string;
+  buttonLabel?: string;
+}
+const { lang, subject, body, buttonLabel } = Astro.props;
+const t = useTranslations(lang);
+const params = new URLSearchParams();
+if (subject) params.set('subject', subject);
+if (body) params.set('body', body);
+// URLSearchParams encodes spaces as "+", which mail clients do not decode.
+const query = params.toString().replace(/\+/g, '%20');
+const href = `mailto:${SITE.email}${query ? `?${query}` : ''}`;
+---
+
+<div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+  <a href={href} class="btn btn-primary">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+      <path d="M3 7l9 6 9-6"></path>
+    </svg>
+    {buttonLabel ?? t('support.emailButton')}
+  </a>
+  <div class="flex items-center gap-2 rounded-lg border border-line bg-bg-2 py-1.5 pl-3 pr-1.5">
+    <span class="select-all font-mono text-sm text-text" data-email>{SITE.email}</span>
+    <button
+      type="button"
+      class="rounded-md px-2.5 py-1.5 text-xs font-semibold text-muted hover:bg-card hover:text-text"
+      data-copy-email
+      data-label-copied={t('support.copied')}
+    >
+      {t('support.copy')}
+    </button>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-copy-email]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const email = btn.parentElement?.querySelector('[data-email]')?.textContent?.trim();
+      if (!email) return;
+      try {
+        await navigator.clipboard.writeText(email);
+        const original = btn.textContent;
+        btn.textContent = btn.dataset.labelCopied ?? 'Copied';
+        setTimeout(() => (btn.textContent = original), 1800);
+      } catch {
+        // Clipboard blocked: the address stays selectable as plain text.
+      }
+    });
+  });
+</script>

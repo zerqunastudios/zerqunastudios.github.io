@@ -1,0 +1,22 @@
+# Build output and caches (safe to delete, rebuilt by `npm run build`)
+dist/
+.astro/
+node_modules/
+.cache/
+
+# Logs
+npm-debug.log*
+*.log
+
+# Environment and secrets: never commit these
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.claude/

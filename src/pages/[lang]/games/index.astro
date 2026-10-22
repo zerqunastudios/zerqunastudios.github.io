@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import GameCard from '../../../components/GameCard.astro';
+import { games, STATUS_ORDER, type GameStatus } from '../../../data/games';
+import type { Locale } from '../../../data/site';
+import { getLangStaticPaths, useTranslations } from '../../../i18n/utils';
+
+export const getStaticPaths = getLangStaticPaths;
+const lang = Astro.params.lang as Locale;
+const t = useTranslations(lang);
+
+const sorted = [...games].sort((a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status));
+const statuses = STATUS_ORDER.filter((s) => games.some((g) => g.status === s));
+const filters: { value: 'all' | GameStatus; label: string }[] = [
+  { value: 'all', label: t('games.filter.all') },
+  ...statuses.map((s) => ({ value: s, label: t(`status.${s}`) })),
+];
+---
+
+<BaseLayout lang={lang} title={t('games.title')} description={t('games.intro')} path="/games/">
+  <PageHeader title={t('games.title')} intro={t('games.intro')} />
+
+  <section class="container-site mt-10">
+    <div class="flex flex-wrap gap-2" role="group" aria-label={t('game.status')} data-filters hidden>
+      {
+        filters.map((f, i) => (
+          <button
+            type="button"
+            data-filter={f.value}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+            class="rounded-full border border-line px-4 py-2 text-sm font-medium text-muted transition-colors hover:text-text aria-pressed:border-accent aria-pressed:bg-accent/10 aria-pressed:text-text"
+          >
+            {f.label}
+          </button>
+        ))
+      }
+    </div>
+
+    <ul class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-game-list>
+      {
+        sorted.map((game) => (
+          <li data-status={game.status} class="flex">
+            <div class="w-full [&>article]:h-full">
+              <GameCard game={game} lang={lang} headingLevel="h2" />
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="mt-8 hidden text-muted" data-empty>{t('games.none')}</p>
+  </section>
+</BaseLayout>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-filters]');
+  const items = document.querySelectorAll<HTMLElement>('[data-game-list] > li');
+  const empty = document.querySelector<HTMLElement>('[data-empty]');
+  if (bar) {
+    bar.hidden = false;
+    bar.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-filter]');
+      if (!btn) return;
+      const value = btn.dataset.filter;
+      bar.querySelectorAll('[data-filter]').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      let shown = 0;
+      items.forEach((li) => {
+        const match = value === 'all' || li.dataset.status === value;
+        li.hidden = !match;
+        if (match) shown++;
+      });
+      empty?.classList.toggle('hidden', shown > 0);
+    });
+  }
+</script>

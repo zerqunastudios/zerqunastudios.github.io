@@ -1,0 +1,151 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import EmailBox from '../../../components/EmailBox.astro';
+import StatusBadge from '../../../components/StatusBadge.astro';
+import { games, gamePath, supportPath, privacyPath, type Game } from '../../../data/games';
+import { supportTopics, reportChecklist, emailTemplate } from '../../../data/support';
+import { LOCALES, type Locale } from '../../../data/site';
+import { localePath, pick, useTranslations } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  return LOCALES.flatMap((lang) => games.map((game) => ({ params: { lang, slug: game.slug }, props: { game } })));
+}
+
+const { game } = Astro.props as { game: Game };
+const lang = Astro.params.lang as Locale;
+const t = useTranslations(lang);
+const title = `${game.title} — ${t('nav.support')}`;
+const intro =
+  lang === 'en'
+    ? `Help with ${game.title}: file locations, controls, known issues and how to contact the developer.`
+    : `${game.title} için yardım: dosya konumları, kontroller, bilinen sorunlar ve geliştiriciyle iletişim.`;
+const locations = game.fileLocations;
+const topics = supportTopics.filter((s) => ['installation', 'performance', 'saves'].includes(s.id));
+---
+
+<BaseLayout lang={lang} title={title} description={intro} path={supportPath(game)}>
+  <PageHeader title={title} intro={intro} eyebrow={t('support.title')}>
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <StatusBadge status={game.status} lang={lang} />
+      <a href={localePath(lang, gamePath(game))} class="text-sm link">{t('support.gamePage')}</a>
+      <a href={localePath(lang, '/support/')} class="text-sm link">{t('support.backToSupport')}</a>
+    </div>
+  </PageHeader>
+
+  <div class="container-site mt-12 grid gap-10 lg:grid-cols-[1fr_22rem]">
+    <div class="min-w-0 space-y-12">
+      <section aria-labelledby="locations">
+        <h2 id="locations" class="section-title">{t('support.files')}</h2>
+        {
+          locations ? (
+            <div class="mt-5 space-y-4">
+              {locations.saves && (
+                <div>
+                  <h3 class="text-sm font-semibold text-muted">{t('support.saveLocation')}</h3>
+                  <code class="code-path mt-1.5">{locations.saves}</code>
+                </div>
+              )}
+              {locations.settings && (
+                <div>
+                  <h3 class="text-sm font-semibold text-muted">{t('support.settingsLocation')}</h3>
+                  <code class="code-path mt-1.5">{locations.settings}</code>
+                </div>
+              )}
+              {locations.logs && (
+                <div>
+                  <h3 class="text-sm font-semibold text-muted">{t('support.logLocation')}</h3>
+                  <code class="code-path mt-1.5">{locations.logs}</code>
+                </div>
+              )}
+              <p class="text-sm text-muted">
+                {t('support.locationsNote')}{' '}
+                {lang === 'en'
+                  ? 'Paste a path into the File Explorer address bar to open it.'
+                  : 'Açmak için yolu Dosya Gezgini’nin adres çubuğuna yapıştırın.'}
+              </p>
+            </div>
+          ) : (
+            <p class="mt-4 text-muted">{t('support.locationsNone')}</p>
+          )
+        }
+      </section>
+
+      {
+        game.controls && (
+          <section aria-labelledby="controls">
+            <h2 id="controls" class="section-title">{t('support.controls')}</h2>
+            <ul class="mt-5 grid gap-2 text-sm">
+              {pick(game.controls, lang).map((c) => (
+                <li class="card px-4 py-3">{c}</li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      <section aria-labelledby="known-issues">
+        <h2 id="known-issues" class="section-title">{t('support.knownIssues')}</h2>
+        {
+          game.knownIssues ? (
+            <ul class="mt-5 space-y-2.5 text-sm text-[#d9dce3]">
+              {pick(game.knownIssues, lang).map((k) => (
+                <li class="flex gap-3">
+                  <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-warn" aria-hidden="true" />
+                  <span>{k}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="mt-4 text-muted">{t('support.noKnownIssues')}</p>
+          )
+        }
+      </section>
+
+      <section aria-labelledby="troubleshooting">
+        <h2 id="troubleshooting" class="section-title">{t('support.general')}</h2>
+        <div class="mt-5 space-y-3">
+          {
+            topics.map((topic) => (
+              <details class="card group p-0">
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold [&::-webkit-details-marker]:hidden">
+                  <h3 class="text-base">{pick(topic.title, lang)}</h3>
+                  <span class="text-accent-text transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+                </summary>
+                <ul class="space-y-2.5 px-5 pb-5 text-sm leading-relaxed text-[#d9dce3]">
+                  {pick(topic.items, lang).map((item) => (
+                    <li class="flex gap-3">
+                      <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+    </div>
+
+    <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
+      <div class="card p-5">
+        <h2 class="font-bold">{t('support.contact')}</h2>
+        <p class="mt-2 text-sm text-muted">{t('support.contactText')}</p>
+        <div class="mt-4">
+          <EmailBox lang={lang} subject={`${game.title} — ${t('support.subjectPrefix')}`} body={pick(emailTemplate, lang)} />
+        </div>
+        <h3 class="mt-6 text-sm font-semibold">{t('support.include')}</h3>
+        <ul class="mt-2 space-y-1.5 text-sm text-muted">
+          {pick(reportChecklist, lang).map((item) => <li>• {item}</li>)}
+        </ul>
+      </div>
+      <div class="card p-5">
+        <h2 class="font-bold">{t('game.privacy')}</h2>
+        <p class="mt-2 text-sm text-muted">{t('game.privacyText')}</p>
+        <a href={localePath(lang, `${privacyPath(game)}#game-${game.slug}`)} class="mt-3 inline-block text-sm link">
+          {t('game.privacyLink')}
+        </a>
+      </div>
+    </aside>
+  </div>
+</BaseLayout>

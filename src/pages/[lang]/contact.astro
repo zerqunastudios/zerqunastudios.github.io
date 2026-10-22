@@ -1,0 +1,69 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import EmailBox from '../../components/EmailBox.astro';
+import { SITE, type Locale } from '../../data/site';
+import { getLangStaticPaths, localePath, useTranslations } from '../../i18n/utils';
+
+export const getStaticPaths = getLangStaticPaths;
+const lang = Astro.params.lang as Locale;
+const t = useTranslations(lang);
+
+const categories = {
+  en: [
+    { id: 'general', title: 'General Inquiries', text: 'Questions about the studio or our games.', subject: 'General inquiry' },
+    { id: 'support', title: 'Game Support', text: 'Problems installing or playing one of our games.', subject: 'Game support', link: '/support/' },
+    { id: 'business', title: 'Business & Publishing', text: 'Publishing, licensing, porting or other business proposals.', subject: 'Business & publishing' },
+    { id: 'press', title: 'Press & Content Creators', text: 'Review keys, interviews, videos and streams.', subject: 'Press & content creators' },
+    { id: 'bugs', title: 'Bug Reports', text: 'Found a bug? Tell us how to reproduce it and attach your log file.', subject: 'Bug report', link: '/support/#bug-reporting' },
+  ],
+  tr: [
+    { id: 'general', title: 'Genel Sorular', text: 'Stüdyo veya oyunlarımız hakkında sorular.', subject: 'Genel soru' },
+    { id: 'support', title: 'Oyun Desteği', text: 'Oyunlarımızdan birini kurarken veya oynarken yaşanan sorunlar.', subject: 'Oyun desteği', link: '/support/' },
+    { id: 'business', title: 'İş Birliği ve Yayıncılık', text: 'Yayıncılık, lisanslama, platform uyarlaması veya diğer iş teklifleri.', subject: 'İş birliği ve yayıncılık' },
+    { id: 'press', title: 'Basın ve İçerik Üreticileri', text: 'İnceleme anahtarları, röportajlar, videolar ve yayınlar.', subject: 'Basın ve içerik üreticileri' },
+    { id: 'bugs', title: 'Hata Bildirimleri', text: 'Bir hata mı buldunuz? Nasıl tekrarlanacağını anlatın ve günlük dosyanızı ekleyin.', subject: 'Hata bildirimi', link: '/support/#bug-reporting' },
+  ],
+}[lang];
+
+const mailto = (subject: string) => `mailto:${SITE.email}?subject=${encodeURIComponent(`[Zerquna] ${subject}`)}`;
+---
+
+<BaseLayout lang={lang} title={t('contact.title')} description={t('contact.intro')} path="/contact/">
+  <PageHeader title={t('contact.title')} intro={t('contact.intro')} />
+
+  <div class="container-site mt-12 space-y-12">
+    <section class="card p-6 sm:p-8" aria-labelledby="email-title">
+      <h2 id="email-title" class="text-sm font-bold uppercase tracking-[0.14em] text-muted">{t('contact.email')}</h2>
+      <p class="mt-3 select-all break-all text-2xl font-bold sm:text-3xl">
+        <a href={`mailto:${SITE.email}`} class="hover:text-accent-text">{SITE.email}</a>
+      </p>
+      <div class="mt-6">
+        <EmailBox lang={lang} buttonLabel={t('contact.write')} />
+      </div>
+      <p class="mt-6 text-sm text-muted">{t('contact.note')}</p>
+    </section>
+
+    <section aria-labelledby="categories-title">
+      <h2 id="categories-title" class="section-title">{t('contact.categories')}</h2>
+      <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          categories.map((cat) => (
+            <li id={cat.id} class="card flex flex-col p-5">
+              <h3 class="font-bold">{cat.title}</h3>
+              <p class="mt-1.5 flex-1 text-sm text-muted">{cat.text}</p>
+              <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                <a href={mailto(cat.subject)} class="link">{t('contact.write')}</a>
+                {cat.link && (
+                  <a href={localePath(lang, cat.link)} class="link">
+                    {t('nav.support')}
+                  </a>
+                )}
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </div>
+</BaseLayout>

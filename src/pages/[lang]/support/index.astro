@@ -1,0 +1,105 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import EmailBox from '../../../components/EmailBox.astro';
+import StatusBadge from '../../../components/StatusBadge.astro';
+import { games, supportPath } from '../../../data/games';
+import { supportTopics, reportChecklist, emailTemplate } from '../../../data/support';
+import type { Locale } from '../../../data/site';
+import { getLangStaticPaths, localePath, pick, useTranslations } from '../../../i18n/utils';
+
+export const getStaticPaths = getLangStaticPaths;
+const lang = Astro.params.lang as Locale;
+const t = useTranslations(lang);
+---
+
+<BaseLayout lang={lang} title={t('support.title')} description={t('support.intro')} path="/support/">
+  <PageHeader title={t('support.title')} intro={t('support.intro')}>
+    <nav class="mt-6 flex flex-wrap gap-2 text-sm" aria-label={t('common.onThisPage')}>
+      <a href="#games" class="btn btn-ghost !min-h-0 !py-2">{t('support.games')}</a>
+      <a href="#general" class="btn btn-ghost !min-h-0 !py-2">{t('support.general')}</a>
+      <a href="#bug-reporting" class="btn btn-ghost !min-h-0 !py-2">{pick(supportTopics.find((s) => s.id === 'bug-reporting')!.title, lang)}</a>
+      <a href="#contact-developer" class="btn btn-ghost !min-h-0 !py-2">{t('support.contact')}</a>
+    </nav>
+  </PageHeader>
+
+  <section id="games" class="container-site mt-12 scroll-mt-24" aria-labelledby="games-title">
+    <h2 id="games-title" class="section-title">{t('support.games')}</h2>
+    <ul class="mt-6 grid gap-4 sm:grid-cols-2">
+      {
+        games.map((g) => (
+          <li>
+            <a
+              href={localePath(lang, supportPath(g))}
+              class="card group flex items-center gap-4 p-3 pr-5 transition-colors hover:border-muted/50"
+            >
+              <div class="relative h-16 w-28 shrink-0 overflow-hidden rounded-lg bg-bg-2">
+                <Image
+                  src={g.cover.src}
+                  alt=""
+                  width={224}
+                  class:list={[
+                    'h-full w-full',
+                    g.cover.src.height > g.cover.src.width ? 'object-contain' : 'object-cover',
+                    g.cover.pixelated && 'pixelated',
+                  ]}
+                />
+              </div>
+              <div class="min-w-0">
+                <p class="font-bold group-hover:text-accent-text">{g.title}</p>
+                <StatusBadge status={g.status} lang={lang} class="mt-1.5" />
+              </div>
+              <span class="ml-auto text-muted" aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section id="general" class="container-site mt-16 scroll-mt-24" aria-labelledby="general-title">
+    <h2 id="general-title" class="section-title">{t('support.general')}</h2>
+    <div class="mt-6 space-y-3">
+      {
+        supportTopics.map((topic, i) => (
+          <details id={topic.id} class="card group scroll-mt-24 p-0" open={i === 0}>
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold [&::-webkit-details-marker]:hidden">
+              <h3 class="text-base">{pick(topic.title, lang)}</h3>
+              <span class="text-accent-text transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+            </summary>
+            <ul class="space-y-2.5 px-5 pb-5 text-sm leading-relaxed text-[#d9dce3]">
+              {pick(topic.items, lang).map((item) => (
+                <li class="flex gap-3">
+                  <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        ))
+      }
+    </div>
+  </section>
+
+  <section id="contact-developer" class="container-site mt-16 scroll-mt-24" aria-labelledby="contact-title">
+    <div class="card grid gap-8 p-6 sm:p-8 lg:grid-cols-2">
+      <div>
+        <h2 id="contact-title" class="section-title">{t('support.contact')}</h2>
+        <p class="mt-3 text-muted">{t('support.contactText')}</p>
+        <div class="mt-6">
+          <EmailBox lang={lang} subject={t('support.subjectPrefix')} body={pick(emailTemplate, lang)} />
+        </div>
+      </div>
+      <div>
+        <h3 class="font-bold">{t('support.include')}</h3>
+        <ul class="mt-3 space-y-2 text-sm text-[#d9dce3]">
+          {pick(reportChecklist, lang).map((item) => <li class="flex gap-3"><span class="text-accent-text" aria-hidden="true">✓</span>{item}</li>)}
+        </ul>
+        <p class="mt-5 text-sm text-muted">
+          <a href={localePath(lang, '/privacy-policy/')} class="link">{t('footer.privacy')}</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

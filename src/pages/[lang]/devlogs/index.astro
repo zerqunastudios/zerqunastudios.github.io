@@ -1,0 +1,92 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import EmptyState from '../../../components/EmptyState.astro';
+import { games } from '../../../data/games';
+import type { Locale } from '../../../data/site';
+import { getLangStaticPaths, localePath, useTranslations, formatDate } from '../../../i18n/utils';
+import { getDevlogsFor } from '../../../lib/devlogs';
+
+export const getStaticPaths = getLangStaticPaths;
+const lang = Astro.params.lang as Locale;
+const t = useTranslations(lang);
+const posts = await getDevlogsFor(lang);
+const gameName = (slug: string) => games.find((g) => g.slug === slug)?.title ?? 'Zerquna Studios';
+const usedGames = games.filter((g) => posts.some((p) => p.entry.data.game === g.slug));
+const iso = (d: Date) => d.toISOString().slice(0, 10);
+---
+
+<BaseLayout lang={lang} title={t('devlogs.title')} description={t('devlogs.intro')} path="/devlogs/">
+  <PageHeader title={t('devlogs.title')} intro={t('devlogs.intro')} />
+
+  <section class="container-site mt-10">
+    {
+      posts.length === 0 ? (
+        <EmptyState title={t('devlogs.emptyTitle')} text={t('devlogs.emptyText')}>
+          <a href={localePath(lang, '/games/')} class="btn btn-ghost mt-6">
+            {t('home.allGames')}
+          </a>
+        </EmptyState>
+      ) : (
+        <Fragment>
+          {usedGames.length > 1 && (
+            <div class="flex flex-wrap items-center gap-2" data-devlog-filters hidden>
+              <span class="mr-1 text-sm text-muted">{t('devlogs.filter')}:</span>
+              <button type="button" data-filter="all" aria-pressed="true" class="rounded-full border border-line px-3.5 py-1.5 text-sm aria-pressed:border-accent aria-pressed:bg-accent/10">
+                {t('devlogs.all')}
+              </button>
+              {usedGames.map((g) => (
+                <button type="button" data-filter={g.slug} aria-pressed="false" class="rounded-full border border-line px-3.5 py-1.5 text-sm text-muted aria-pressed:border-accent aria-pressed:bg-accent/10 aria-pressed:text-text">
+                  {g.title}
+                </button>
+              ))}
+            </div>
+          )}
+          <ul class="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-devlog-list>
+            {posts.map((p) => (
+              <li data-game={p.entry.data.game} class="card flex flex-col overflow-hidden">
+                {p.entry.data.cover && (
+                  <Image
+                    src={p.entry.data.cover}
+                    alt={p.entry.data.coverAlt ?? ''}
+                    widths={[400, 720]}
+                    sizes="(min-width: 1024px) 33vw, 100vw"
+                    class="aspect-video w-full object-cover"
+                  />
+                )}
+                <div class="flex flex-1 flex-col p-5">
+                  <p class="text-xs text-muted">
+                    <time datetime={iso(p.entry.data.date)}>{formatDate(iso(p.entry.data.date), lang)}</time> ·{' '}
+                    {gameName(p.entry.data.game)}
+                  </p>
+                  <h2 class="mt-2 text-lg font-bold">
+                    <a href={localePath(lang, `/devlogs/${p.slug}/`)} class="hover:text-accent-text">
+                      {p.entry.data.title}
+                    </a>
+                  </h2>
+                  <p class="mt-2 text-sm text-muted">{p.entry.data.description}</p>
+                  {p.isFallback && <p class="mt-3 text-xs text-warn">EN</p>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Fragment>
+      )
+    }
+  </section>
+</BaseLayout>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-devlog-filters]');
+  if (bar) {
+    bar.hidden = false;
+    const items = document.querySelectorAll<HTMLElement>('[data-devlog-list] > li');
+    bar.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-filter]');
+      if (!btn) return;
+      bar.querySelectorAll('[data-filter]').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      items.forEach((li) => (li.hidden = btn.dataset.filter !== 'all' && li.dataset.game !== btn.dataset.filter));
+    });
+  }
+</script>
