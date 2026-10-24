@@ -59,6 +59,7 @@ const topics = supportTopics.filter((s) => ['installation', 'performance', 'save
                 </div>
               )}
               <p class="text-sm text-muted">
+                {game.fileLocationsNote && <Fragment>{pick(game.fileLocationsNote, lang)}{' '}</Fragment>}
                 {t('support.locationsNote')}{' '}
                 {lang === 'en'
                   ? 'Paste a path into the File Explorer address bar to open it.'

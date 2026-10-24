@@ -1,0 +1,51 @@
+---
+// Static redirect pages for moved addresses (see src/data/redirects.mjs).
+// Works on GitHub Pages: an instant meta refresh plus a script that keeps any
+// #section in the URL. Search engines get noindex + a canonical to the new page.
+import { redirects } from '../../data/redirects.mjs';
+import { LOCALES, type Locale } from '../../data/site';
+import { localePath } from '../../i18n/utils';
+
+export function getStaticPaths() {
+  return LOCALES.flatMap((lang) =>
+    redirects.map((r) => ({
+      params: { lang, moved: r.from.replace(/^\/|\/$/g, '') },
+      props: { to: r.to },
+    })),
+  );
+}
+
+const lang = Astro.params.lang as Locale;
+const { to } = Astro.props as { to: string };
+const target = localePath(lang, to);
+const absolute = new URL(target, Astro.site!).href;
+const text = {
+  en: { title: 'This page has moved', link: 'Continue to the new page' },
+  tr: { title: 'Bu sayfa taşındı', link: 'Yeni sayfaya git' },
+}[lang];
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{text.title} | Zerquna Studios</title>
+    <meta name="robots" content="noindex, follow" />
+    <link rel="canonical" href={absolute} />
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+    <script is:inline define:vars={{ target }}>
+      location.replace(target + location.hash);
+    </script>
+    <style>
+      body { background: #090b10; color: #f5f5f5; font-family: system-ui, sans-serif; display: grid; place-items: center; min-height: 100vh; margin: 0; text-align: center; }
+      a { color: #f5f5f5; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>{text.title}</h1>
+      <p><a href={target}>{text.link}</a></p>
+    </main>
+  </body>
+</html>

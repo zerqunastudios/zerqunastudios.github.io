@@ -28,9 +28,9 @@ import sc2Entrance from '../assets/games/spincraft-2-creative/01-entrance.webp';
 
 import eoteExplorer from '../assets/games/echoes-of-the-earth/explorer-final.webp';
 
-import dsBackdrop from '../assets/games/dead-sector-outbreak/menu-backdrop.webp';
-import dsInterior from '../assets/games/dead-sector-outbreak/interior-overview.webp';
-import dsArt from '../assets/games/dead-sector-outbreak/art-overview.webp';
+import vkBackdrop from '../assets/games/velkrion-the-first-breach/menu-backdrop.webp';
+import vkInterior from '../assets/games/velkrion-the-first-breach/interior-overview.webp';
+import vkArt from '../assets/games/velkrion-the-first-breach/art-overview.webp';
 
 export type GameStatus = 'released' | 'demo-available' | 'in-development';
 
@@ -45,6 +45,10 @@ export interface GameImage {
 export interface StoreLink {
   store: 'itch.io' | 'Microsoft Store' | 'Steam' | 'GitHub Releases';
   url: string;
+  /** Button text, e.g. "Get on itch.io". Defaults to "Get on <store>". */
+  label?: Localized;
+  /** Short, verified note about how the game is offered there (no prices). */
+  note?: Localized;
 }
 
 export interface DownloadItem {
@@ -86,6 +90,8 @@ export interface Game {
   features: Localized<string[]>;
   /** Shown under the features list, e.g. "features may change". */
   featuresNote?: Localized;
+  /** Plans that are NOT in the game yet. Shown in a separate "Planned Features" section. */
+  plannedFeatures?: Localized<string[]>;
   cover: GameImage;
   screenshots: GameImage[];
   /** Short note about the media shown (e.g. work-in-progress captures). */
@@ -103,6 +109,8 @@ export interface Game {
   knownIssues?: Localized<string[]>;
   /** Paths on Windows for the current build, used on the support page. */
   fileLocations?: { saves?: string; logs?: string; settings?: string };
+  /** Optional extra explanation shown under the file locations. */
+  fileLocationsNote?: Localized;
   privacy: GamePrivacy;
   /** Defaults to the central policy. Set only if this game needs its own policy. */
   privacyPolicyPath?: string;
@@ -125,7 +133,7 @@ export const games: Game[] = [
   {
     id: 'game-01',
     slug: 'spincraft',
-    title: 'SpinCraft',
+    title: 'SpinCraft: Wood Workshop',
     status: 'released',
     featured: true,
     genre: { en: 'Simulation', tr: 'Simülasyon' },
@@ -137,12 +145,14 @@ export const games: Game[] = [
     },
     description: {
       en: [
-        'SpinCraft is a woodturning simulation set in a cosy lathe workshop. Pick a customer order, mount a blank and carve the spinning wood with a set of turning chisels until it matches the target profile.',
-        'Sand the surface smooth, paint it stroke by stroke, choose a finish and sell your work. Earn money and experience, buy better tools and new wood species, and take on more demanding orders.',
+        'SpinCraft: Wood Workshop is a relaxing woodturning simulation set in a cosy lathe workshop. Pick a customer order, mount a blank on the lathe and carve the spinning wood with your chisels until it matches the target shape: a bowl, a vase, a chess piece, a candlestick or a table leg.',
+        'Once the shape is right, sand the surface smooth zone by zone, paint it stroke by stroke with a brush, choose a finish and sell the piece. The money and experience you earn unlock new wood species, better chisels, lathe upgrades and more demanding orders. When you just want to make something for yourself, free crafting mode has no customer and no target.',
+        'The game is out now on itch.io for Windows PC, with English and Turkish interface languages.',
       ],
       tr: [
-        'SpinCraft, sıcak bir torna atölyesinde geçen bir ahşap tornacılığı simülasyonudur. Bir müşteri siparişi seçin, kütüğü tornaya bağlayın ve dönen ahşabı keskilerle hedef profile ulaşana kadar yontun.',
-        'Yüzeyi zımparalayın, fırça darbeleriyle boyayın, bir cila seçin ve eserinizi satın. Para ve deneyim kazanın, daha iyi aletler ve yeni ahşap türleri satın alın, daha zorlu siparişlere geçin.',
+        'SpinCraft: Wood Workshop, sıcak bir torna atölyesinde geçen, rahatlatıcı bir ahşap tornacılığı simülasyonudur. Bir müşteri siparişi seçin, kütüğü tornaya bağlayın ve dönen ahşabı keskilerinizle hedef şekle ulaşana kadar yontun: bir kâse, bir vazo, bir satranç taşı, bir şamdan ya da bir masa ayağı.',
+        'Şekil tamam olduğunda yüzeyi bölge bölge zımparalayın, fırçayla darbe darbe boyayın, bir cila seçin ve eseri satın. Kazandığınız para ve deneyimle yeni ahşap türleri, daha iyi keskiler, torna yükseltmeleri ve daha zorlu siparişler açılır. Sadece kendiniz için bir şey yapmak istediğinizde serbest üretim modunda ne müşteri ne de hedef şekil vardır.',
+        'Oyun, Windows PC için itch.io’da yayında. Arayüz İngilizce ve Türkçe olarak sunuluyor.',
       ],
     },
     features: {
@@ -170,8 +180,8 @@ export const games: Game[] = [
     cover: {
       src: scFinished,
       alt: {
-        en: 'A finished turned piece on the lathe in SpinCraft, with the product review panel open',
-        tr: 'SpinCraft’ta tornada bitmiş bir eser ve açık ürün inceleme paneli',
+        en: 'A finished turned piece on the lathe in SpinCraft: Wood Workshop, with the product review panel open',
+        tr: 'SpinCraft: Wood Workshop’ta tornada bitmiş bir eser ve açık ürün inceleme paneli',
       },
     },
     screenshots: [
@@ -200,7 +210,17 @@ export const games: Game[] = [
       en: 'Screenshots captured from the Windows build with the Turkish interface.',
       tr: 'Ekran görüntüleri, Türkçe arayüzlü Windows sürümünden alınmıştır.',
     },
-    storeLinks: [],
+    storeLinks: [
+      {
+        store: 'itch.io',
+        url: 'https://zerqunastudios.itch.io/spincraft-wood-workshop',
+        label: { en: 'Get on itch.io', tr: "itch.io'dan Edin" },
+        note: {
+          en: 'The full game for Windows PC. Purchase and download through itch.io.',
+          tr: 'Windows PC için tam oyun. Satın alma ve indirme itch.io üzerinden yapılır.',
+        },
+      },
+    ],
     downloads: [],
     testedOn: 'Windows 11 · NVIDIA GeForce GTX 1650 Ti (laptop) · 1920×1080',
     controls: {
@@ -344,12 +364,14 @@ export const games: Game[] = [
     },
     description: {
       en: [
-        'Echoes of the Earth is a voxel sandbox survival game. Explore a generated world, mine and place blocks, hunt, craft tools and build a place to live.',
-        'Villages are home to villagers and traders with their own economy. Trade, donate to help settlements grow from a hamlet into a town, and build a reputation with the people you meet.',
+        'Echoes of the Earth is a voxel sandbox game, still in active development. The world is built from blocks and generated as you explore it: plains, forests, deserts and rocky highlands, streamed in piece by piece around you. Mine and place blocks, cut down trees block by block, hunt, craft tools and build a place to live.',
+        'Exploring leads you to villages with villagers and traders who have their own small economy. Trade with them, donate to help a settlement grow from a hamlet into a town, and build a reputation with the people you meet.',
+        'A free demo is available on itch.io for Windows. You can download it for free, and if you would like to support development you can choose to pay what you want. It is a work-in-progress build: expect bugs, unfinished features and performance that varies between PCs. The demo’s interface is currently in Turkish.',
       ],
       tr: [
-        'Echoes of the Earth, voksel tabanlı bir sandbox hayatta kalma oyunudur. Oluşturulan bir dünyayı keşfedin, blok kırın ve yerleştirin, avlanın, alet üretin ve kendinize yaşayacak bir yer kurun.',
-        'Köylerde kendi ekonomisi olan köylüler ve tüccarlar yaşar. Ticaret yapın, yerleşimlerin mezradan kasabaya büyümesi için bağışta bulunun ve tanıştığınız insanlar arasında itibar kazanın.',
+        'Echoes of the Earth, hâlâ aktif olarak geliştirilen voxel tabanlı bir sandbox oyunudur. Dünya bloklardan oluşur ve siz keşfettikçe üretilir: ovalar, ormanlar, çöller ve kayalık yaylalar, çevrenizde parça parça yüklenir. Blok kırıp yerleştirin, ağaçları blok blok kesin, avlanın, alet üretin ve kendinize yaşayacak bir yer kurun.',
+        'Keşfe çıktıkça kendi küçük ekonomisi olan köylülerin ve tüccarların yaşadığı köylere ulaşırsınız. Onlarla ticaret yapın, bir yerleşimin mezradan kasabaya büyümesi için bağışta bulunun ve tanıştığınız insanlar arasında itibar kazanın.',
+        'itch.io’da Windows için ücretsiz bir demo bulunuyor. Demoyu ücretsiz indirebilirsiniz; geliştirmeyi desteklemek isterseniz dilediğiniz tutarı ödemeyi seçebilirsiniz. Bu bir yapım aşaması sürümüdür: hatalar, tamamlanmamış özellikler ve bilgisayara göre değişen performans olabilir. Demonun arayüzü şu anda Türkçedir.',
       ],
     },
     features: {
@@ -390,8 +412,27 @@ export const games: Game[] = [
       en: 'Character art shown. In-game screenshots will be added soon.',
       tr: 'Karakter çizimi gösterilmektedir. Oyun içi ekran görüntüleri yakında eklenecek.',
     },
-    storeLinks: [],
-    downloads: [],
+    storeLinks: [
+      {
+        store: 'itch.io',
+        url: 'https://zerqunastudios.itch.io/echoes-of-the-earth',
+        label: { en: 'Get on itch.io', tr: "itch.io'dan Edin" },
+        note: {
+          en: 'Free demo for Windows. Optional support: pay what you want if you would like to back development.',
+          tr: 'Windows için ücretsiz demo. Destek isteğe bağlıdır: geliştirmeye katkı olarak dilediğiniz tutarı ödeyebilirsiniz.',
+        },
+      },
+    ],
+    downloads: [
+      {
+        title: { en: 'Free demo (Release Candidate 2)', tr: 'Ücretsiz demo (Release Candidate 2)' },
+        version: 'RC2',
+        platform: 'Windows x64',
+        source: 'itch.io',
+        url: 'https://zerqunastudios.itch.io/echoes-of-the-earth',
+        size: '36 MB',
+      },
+    ],
     controls: {
       en: [
         'W A S D: move · Mouse: look · Space: jump · Left Shift: sprint',
@@ -441,66 +482,94 @@ export const games: Game[] = [
   },
   {
     id: 'game-04',
-    slug: 'dead-sector-outbreak',
-    title: 'Dead Sector: Outbreak',
-    status: 'in-development',
+    slug: 'velkrion-the-first-breach',
+    title: 'VELKRION: THE FIRST BREACH',
+    status: 'demo-available',
     featured: false,
-    genre: { en: '2D Top-Down Zombie Shooter', tr: '2D Kuşbakışı Zombi Nişancı' },
+    genre: { en: 'Top-Down 2D Pixel-Art Zombie Survival Shooter', tr: 'Kuşbakışı 2D Piksel Sanat Zombi Hayatta Kalma Nişancısı' },
     platforms: ['Windows PC'],
     engine: 'Godot 4',
     tagline: {
-      en: 'Sector 07 has fallen. Fight your way out.',
-      tr: 'Sektör 07 düştü. Çıkışa kadar savaş.',
+      en: 'The outbreak starts at the Main Camp. Hold on until the gate opens.',
+      tr: 'Salgın Ana Kamp’ta başlıyor. Kapı açılana kadar dayan.',
     },
     description: {
       en: [
-        'Dead Sector: Outbreak is a 2D top-down zombie shooter with a pixel-art look. A military outpost has been overrun, and you must fight through its barracks, armory, medical wing and generator room to survive.',
-        'Scavenge weapons and ammunition, keep your flashlight ready, and learn how each type of infected moves and attacks.',
+        'VELKRION: THE FIRST BREACH is a top-down, 2D pixel-art zombie survival shooter set at the very start of an outbreak. You play a soldier at a military outpost, the Main Camp, just as communications fail and the camp’s defences begin to give way.',
+        'The first chapter is playable now as a free demo. Search the dark camp with your flashlight, find weapons and supplies, get the generator running to bring the power back, then survive five minutes of growing attacks while the security gate slowly opens.',
+        'The game is in active development. The demo may contain bugs, balance issues and unfinished parts, and anything in it can still change.',
       ],
       tr: [
-        'Dead Sector: Outbreak, piksel sanat görünümüne sahip 2D kuşbakışı bir zombi nişancı oyunudur. Bir askerî üs istila edildi; hayatta kalmak için koğuşlar, cephanelik, revir ve jeneratör odası boyunca savaşmalısınız.',
-        'Silah ve cephane toplayın, fenerinizi hazır tutun ve her enfekte türünün nasıl hareket ettiğini ve saldırdığını öğrenin.',
+        'VELKRION: THE FIRST BREACH, bir salgının tam başlangıcında geçen, kuşbakışı 2D piksel sanat bir zombi hayatta kalma nişancısıdır. İletişimin koptuğu ve savunmaların çökmeye başladığı bir askerî üste, Ana Kamp’ta görevli bir askeri yönetirsiniz.',
+        'İlk bölüm şu anda ücretsiz demo olarak oynanabiliyor. Karanlık kampı fenerinizle arayın, silah ve malzeme bulun, elektriği geri getirmek için jeneratörü çalıştırın; ardından güvenlik kapısı yavaşça açılırken giderek şiddetlenen saldırılara beş dakika boyunca dayanın.',
+        'Oyun aktif olarak geliştiriliyor. Demoda hatalar, denge sorunları ve tamamlanmamış bölümler olabilir; içindeki her şey hâlâ değişebilir.',
       ],
     },
     features: {
       en: [
-        'Seven zombie types, from the Walker and Runner to the Brute, Spitter and Alpha',
-        'Six weapons: Pistol, SMG, Assault Rifle, Shotgun, LMG and Minigun',
-        'A military outpost map with distinct buildings to explore',
-        'Flashlight, ammunition pickups and weapon switching',
-        'Hand-made pixel art',
+        'A military outpost to explore: barracks, armory, medical wing, generator room and security office',
+        'A dark atmosphere where your flashlight is often the only light',
+        'Six weapons: Pistol, SMG, Assault Rifle, Shotgun, LMG and Minigun, with ammunition to manage',
+        'Seven zombie types: Walker, Runner, Armored, Brute, Spitter, Crawler and Alpha, each with its own behaviour',
+        'Interactive objects: doors, documents, ammo crates, weapon pickups, a fuse and an electrical panel',
+        'A generator and power system: restore power and the camp lights come back on one by one',
+        'A security gate that takes five minutes to open, and a defence against attack waves from several directions while it does',
+        'Survival-focused play: you do not have to kill every zombie, you have to make it out',
+        'A checkpoint save once the generator is running',
       ],
       tr: [
-        'Walker ve Runner’dan Brute, Spitter ve Alpha’ya kadar yedi zombi türü',
-        'Altı silah: Tabanca, SMG, Piyade Tüfeği, Pompalı, LMG ve Minigun',
-        'Keşfedilecek farklı binalara sahip askerî üs haritası',
-        'Fener, cephane toplama ve silah değiştirme',
-        'Elle çizilmiş piksel sanat',
+        'Keşfedilecek bir askerî üs: koğuşlar, cephanelik, revir, jeneratör odası ve güvenlik ofisi',
+        'Fenerinizin çoğu zaman tek ışık kaynağı olduğu karanlık bir atmosfer',
+        'Altı silah: Tabanca, SMG, Piyade Tüfeği, Pompalı, LMG ve Minigun; mühimmatı idareli kullanmak gerekir',
+        'Yedi zombi türü: Walker, Runner, Armored, Brute, Spitter, Crawler ve Alpha; her birinin kendine özgü davranışı var',
+        'Etkileşimli nesneler: kapılar, belgeler, cephane kutuları, silahlar, bir sigorta ve bir elektrik panosu',
+        'Jeneratör ve elektrik sistemi: elektriği geri getirin, kamp ışıkları tek tek yeniden yansın',
+        'Açılması beş dakika süren bir güvenlik kapısı ve bu sırada farklı yönlerden gelen saldırı dalgalarına karşı savunma',
+        'Hayatta kalma odaklı oynanış: her zombiyi öldürmek zorunda değilsiniz, kurtulmanız gerekiyor',
+        'Jeneratör çalıştıktan sonra alınan kontrol noktası kaydı',
       ],
     },
     featuresNote: {
-      en: 'Features are in development and may change.',
-      tr: 'Özellikler geliştirme aşamasındadır ve değişebilir.',
+      en: 'These features describe the Chapter 1 demo that is available today. Everything may still change during development.',
+      tr: 'Bu özellikler bugün oynanabilen 1. Bölüm demosunu anlatır. Geliştirme sırasında her şey değişebilir.',
+    },
+    plannedFeatures: {
+      en: [
+        'A long story told across connected chapters, with a long-term goal of 250 chapters',
+        'New regions beyond the military outpost',
+        'A wider variety of puzzles',
+        'A four-person squad',
+        'Switching between squad members',
+        'AI-controlled teammates',
+      ],
+      tr: [
+        'Birbirine bağlı bölümlerle anlatılan uzun bir hikâye; uzun vadeli hedef toplam 250 bölüm',
+        'Askerî üssün ötesinde yeni bölgeler',
+        'Daha çeşitli bulmacalar',
+        'Dört kişilik bir ekip',
+        'Ekip üyeleri arasında geçiş',
+        'Yapay zekâ kontrollü takım arkadaşları',
+      ],
     },
     cover: {
-      src: dsBackdrop,
+      src: vkBackdrop,
       alt: {
-        en: 'Top-down pixel-art view of the Sector 07 outpost streets in Dead Sector: Outbreak',
-        tr: 'Dead Sector: Outbreak’te Sektör 07 üssünün sokaklarının kuşbakışı piksel sanat görünümü',
+        en: 'Top-down pixel-art view of the Main Camp streets in VELKRION: THE FIRST BREACH',
+        tr: 'VELKRION: THE FIRST BREACH’te Ana Kamp sokaklarının kuşbakışı piksel sanat görünümü',
       },
       pixelated: true,
     },
     screenshots: [
       {
-        src: dsInterior,
+        src: vkInterior,
         alt: {
-          en: 'Map overview of the outpost with building interiors',
-          tr: 'Bina iç mekânlarıyla birlikte üssün harita görünümü',
+          en: 'Map overview of the Main Camp with building interiors',
+          tr: 'Bina iç mekânlarıyla birlikte Ana Kamp’ın harita görünümü',
         },
         pixelated: true,
       },
       {
-        src: dsArt,
+        src: vkArt,
         alt: {
           en: 'Zombie types and weapons artwork',
           tr: 'Zombi türleri ve silahların çizimleri',
@@ -512,11 +581,30 @@ export const games: Game[] = [
       en: 'Work-in-progress art and map captures from development. Not final.',
       tr: 'Geliştirme sürecinden yapım aşaması çizim ve harita görüntüleri. Nihai değildir.',
     },
-    storeLinks: [],
-    downloads: [],
+    storeLinks: [
+      {
+        store: 'itch.io',
+        url: 'https://zerqunastudios.itch.io/velkrion-the-first-breach',
+        label: { en: 'Get the Demo on itch.io', tr: "Demoyu itch.io'dan Edin" },
+        note: {
+          en: 'Free Chapter 1 demo for Windows. Optional support: pay what you want if you would like to back development.',
+          tr: 'Windows için ücretsiz 1. Bölüm demosu. Destek isteğe bağlıdır: geliştirmeye katkı olarak dilediğiniz tutarı ödeyebilirsiniz.',
+        },
+      },
+    ],
+    downloads: [
+      {
+        title: { en: 'Free demo (Chapter 1)', tr: 'Ücretsiz demo (1. Bölüm)' },
+        version: 'v0.1.0',
+        platform: 'Windows',
+        source: 'itch.io',
+        url: 'https://zerqunastudios.itch.io/velkrion-the-first-breach',
+        size: '45 MB',
+      },
+    ],
     controls: {
       en: [
-        'W A S D: move · Shift: sprint',
+        'W A S D: move · Shift: run',
         'Mouse: aim · Left mouse: fire',
         'R: reload · E: interact / pick up · F: flashlight',
         '1–6 or mouse wheel: switch weapon',
@@ -530,15 +618,26 @@ export const games: Game[] = [
         'Esc: duraklatma',
       ],
     },
+    fileLocations: {
+      saves: '%APPDATA%\\Godot\\app_userdata\\DeadSectorOutbreak\\campaign_save.json',
+      settings: '%APPDATA%\\Godot\\app_userdata\\DeadSectorOutbreak\\audio_settings.cfg, combat_settings.cfg',
+      logs: '%APPDATA%\\Godot\\app_userdata\\DeadSectorOutbreak\\logs\\',
+    },
+    fileLocationsNote: {
+      en: 'The folder keeps the project’s internal name so that existing saves and settings stay where they are.',
+      tr: 'Mevcut kayıt ve ayarların yerinde kalması için klasör, projenin iç adını korur.',
+    },
     privacy: {
       engine: 'Godot 4',
       localData: {
         en: [
-          'Audio settings are saved in a small settings file on your PC.',
+          'A checkpoint save (with a copy of the previous one as a backup) is written to your PC once the generator is running. It contains game progress only: the chapter, puzzle state, your position, weapons and ammunition, opened doors, the zombies alive at that moment, your kill count and flashlight state.',
+          'Audio settings and combat display settings (damage numbers, camera shake) are saved in small settings files on your PC.',
           'The Godot engine writes technical log files on your PC. They stay on your device unless you choose to send them to us.',
         ],
         tr: [
-          'Ses ayarları bilgisayarınızda küçük bir ayar dosyasına kaydedilir.',
+          'Jeneratör çalıştıktan sonra bilgisayarınıza bir kontrol noktası kaydı (yedek olarak bir önceki kaydın kopyasıyla birlikte) yazılır. Bu kayıt yalnızca oyun ilerlemesini içerir: bölüm, bulmaca durumu, konumunuz, silah ve mühimmatınız, açılan kapılar, o anda hayatta olan zombiler, öldürme sayınız ve fenerin durumu.',
+          'Ses ayarları ve savaş görünümü ayarları (hasar rakamları, kamera sarsıntısı) bilgisayarınızda küçük ayar dosyalarına kaydedilir.',
           'Godot motoru bilgisayarınıza teknik günlük dosyaları yazar. Bu dosyalar, siz bize göndermeyi seçmedikçe cihazınızda kalır.',
         ],
       },

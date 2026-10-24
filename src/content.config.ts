@@ -21,6 +21,8 @@ const devlogs = defineCollection({
       game: z.enum([...gameSlugs, 'studio']),
       cover: image().optional(),
       coverAlt: z.string().optional(),
+      // Set for pixel art so the cover is scaled crisply instead of smoothed.
+      coverPixelated: z.boolean().default(false),
       draft: z.boolean().default(false),
     }),
 });

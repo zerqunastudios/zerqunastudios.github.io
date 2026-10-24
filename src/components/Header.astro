@@ -27,8 +27,9 @@ const isActive = (p: string) => (p === '/' ? path === '/' : path.startsWith(p));
 
 <header class="sticky top-0 z-50 border-b border-line/70 bg-bg/85 backdrop-blur-md">
   <div class="container-site flex h-16 items-center justify-between gap-4">
-    <a href={localePath(lang, '/')} class="shrink-0" aria-label="Zerquna Studios — home">
+    <a href={localePath(lang, '/')} class="shrink-0">
       <Logo size={34} />
+      <span class="sr-only"> — {t('nav.home')}</span>
     </a>
 
     <nav aria-label={t('nav.main')} class="hidden lg:block">

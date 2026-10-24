@@ -52,7 +52,7 @@ A build made from different settings could behave differently. See item 2.2.
   about buyers (for example whether itch.io shows buyer email addresses). Section 3.2 currently says this
   in general terms. Make it specific once confirmed.
 - [ ] **2.8 Age ratings.** Microsoft Store uses the IARC questionnaire. Complete it honestly for each game
-  (Dead Sector: Outbreak contains zombie combat). Section 7 points players to the store ratings and makes
+  (VELKRION: THE FIRST BREACH contains zombie combat). Section 7 points players to the store ratings and makes
   no age claims of its own.
 - [ ] **2.9 HTTPS.** The policy says the site is served over HTTPS. This is automatic on `*.github.io`.
   If you add a custom domain, tick **Enforce HTTPS** in the repository's Pages settings.
@@ -84,10 +84,10 @@ Project: `D:\Proje\SpinCraft`
 | No `PlayerPrefs` (no registry settings) | ✅ verified |
 | The itch.io build was made from these same project settings | ☐ confirm |
 | Network test of the itch.io build (item 2.2) | ☐ to do |
-| Official itch.io page URL → add to `storeLinks` | ☐ missing |
+| Official itch.io page | ✅ https://zerqunastudios.itch.io/spincraft-wood-workshop |
 | Release date and version number → add `releaseDate` | ☐ missing |
 | Official system requirements → add `requirements` | ☐ missing (only the dev test PC is shown, clearly labelled) |
-| Interface languages (screenshots show Turkish) | ☐ confirm, then mention on the game page if useful |
+| Interface languages | ✅ English and Turkish (itch.io page) — shown on the game page |
 | Gameplay trailer → add `trailerYouTubeId` | ☐ none yet |
 
 ### SpinCraft 2: Creative — In Development · Unity 6000.6.4f1
@@ -116,23 +116,25 @@ Project: `D:\Echoes of The Earth\EchoesOfTheEarth`
 | Engine Diagnostics on (inactive without Unity Cloud) | ⚠️ see item 2.4 |
 | World saves: `%USERPROFILE%\AppData\LocalLow\Echoes\Echoes of the Earth\Worlds\` (+ `.bak`, `.tmp`, `.regions`) | ✅ verified |
 | Log: same product folder, `Player.log` | ✅ verified |
-| Official demo download link (itch.io / GitHub Releases) → add to `downloads` | ☐ missing — the Downloads page shows "coming soon" |
-| Demo version number and file size | ☐ missing |
+| Official demo page | ✅ https://zerqunastudios.itch.io/echoes-of-the-earth (RC2, 36 MB) |
+| Demo version label | ⚠️ itch.io text says RC1 but the file is RC2 — align the itch.io description |
 | In-game screenshots (only character art is shown now) | ☐ add |
 | Network test of the demo build (item 2.2) | ☐ to do |
 
-### Dead Sector: Outbreak — In Development · Godot 4.7.2
-Project: `D:\DeadSectorOutbreak`
+### VELKRION: THE FIRST BREACH — Demo Available (Chapter 1, v0.1.0, itch.io) · Godot 4.7.2
+Project: `D:\DeadSectorOutbreak` (folder name kept on purpose; renamed from "Dead Sector: Outbreak" on 23 Oct 2026)
 
 | Item | Status |
 |---|---|
-| No network code (`HTTPRequest`, `HTTPClient`, `WebSocket`, `ENet`, multiplayer) | ✅ verified |
+| No network code (`HTTPRequest`, `HTTPClient`, `WebSocket`, `ENet`, multiplayer) | ✅ re-verified 25 Oct 2026 |
 | No analytics / telemetry addons | ✅ verified (Godot has no built-in telemetry) |
-| Audio settings: `user://audio_settings.cfg` | ✅ verified in code |
-| Godot log files in the user data folder | ✅ folder seen on dev PC (`%APPDATA%\Godot\app_userdata\DeadSectorOutbreak\logs`) |
-| Save system for the final game (chapters, progress) | ☐ add to `privacy.localData` when it exists |
-| Exported build's user-data path | ☐ confirm after export, then add `fileLocations` |
-| Store links, release date, requirements | ☐ at release |
+| Checkpoint save: `user://campaign_save.json` + `campaign_save.previous.json` (progress only, written after the generator starts) | ✅ verified in code, disclosed in policy |
+| Settings: `user://audio_settings.cfg`, `user://combat_settings.cfg` (damage numbers, camera shake) | ✅ verified in code |
+| User-data folder: custom dir `Godot/app_userdata/DeadSectorOutbreak` → `%APPDATA%\Godot\app_userdata\DeadSectorOutbreak\` | ✅ verified in `project.godot`; shown on the support page |
+| Godot log files in `...\logs\` | ✅ folder seen on dev PC |
+| Network test of the itch.io demo build (item 2.2) | ☐ to do |
+| Official itch.io page | ✅ https://zerqunastudios.itch.io/velkrion-the-first-breach |
+| Release date, requirements | ☐ at release |
 
 ---
 
@@ -147,7 +149,7 @@ Use these after the site is live. Replace `<SITE>` with the published address.
 | Support contact info | `<SITE>/en/support/<game-slug>/` (or `zerquna.studios@gmail.com`) |
 | Developer contact | `zerquna.studios@gmail.com` |
 
-Game slugs: `spincraft`, `spincraft-2-creative`, `echoes-of-the-earth`, `dead-sector-outbreak`.
+Game slugs: `spincraft`, `spincraft-2-creative`, `echoes-of-the-earth`, `velkrion-the-first-breach`.
 
 Microsoft Store Policies (version 7.20, checked 22 Oct 2026), policy **10.5.1**: Win32 / Desktop Bridge
 products must always have a privacy policy; it must say what personal information is accessed,

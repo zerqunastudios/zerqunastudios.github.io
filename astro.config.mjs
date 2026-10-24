@@ -2,6 +2,9 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
+import { redirects } from './src/data/redirects.mjs';
+
+const movedPaths = redirects.map((r) => r.from);
 
 // The public URL is never hard-coded. In GitHub Actions, the deploy workflow
 // reads it from the repository's GitHub Pages settings (actions/configure-pages)
@@ -17,8 +20,10 @@ export default defineConfig({
   integrations: [
     sitemap({
       i18n: { defaultLocale: 'en', locales: { en: 'en', tr: 'tr' } },
-      // Keep the root language redirect and the 404 page out of the sitemap.
-      filter: (page) => /\/(en|tr)\//.test(page),
+      // Keep the root language redirect, the 404 page and moved-page
+      // redirects out of the sitemap.
+      filter: (page) =>
+        /\/(en|tr)\//.test(page) && !movedPaths.some((p) => new RegExp(`/(en|tr)${p}$`).test(page)),
     }),
   ],
   vite: { plugins: [tailwindcss()] },

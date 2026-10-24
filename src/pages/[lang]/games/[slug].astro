@@ -4,6 +4,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import GameImg from '../../../components/GameImg.astro';
 import StatusBadge from '../../../components/StatusBadge.astro';
 import Trailer from '../../../components/Trailer.astro';
+import GameStoreLinks from '../../../components/GameStoreLinks.astro';
 import { games, gamePath, supportPath, privacyPath, type Game, type Requirements } from '../../../data/games';
 import { LOCALES, type Locale } from '../../../data/site';
 import { localePath, pick, useTranslations, formatDate, withBase } from '../../../i18n/utils';
@@ -114,17 +115,17 @@ if (game.storeLinks.length) videoGame.sameAs = game.storeLinks.map((s) => s.url)
           <h1 class="mt-3 text-4xl font-bold sm:text-5xl">{game.title}</h1>
           <p class="mt-3 text-lg text-muted">{pick(game.tagline, lang)}</p>
           <div class="mt-7 flex flex-wrap gap-3">
-            {
-              game.storeLinks.map((s) => (
-                <a href={s.url} class="btn btn-primary" rel="noopener noreferrer" target="_blank">
-                  {s.store} <span class="sr-only">({t('common.external')})</span>
-                  <span aria-hidden="true">↗</span>
-                </a>
-              ))
-            }
+            {game.storeLinks.length > 0 && <GameStoreLinks game={game} lang={lang} variant="buttons" />}
             <a href={localePath(lang, supportPath(game))} class="btn btn-ghost">{t('game.support')}</a>
           </div>
           {game.storeLinks.length === 0 && <p class="mt-4 text-sm text-muted">{t('game.storesNone')}</p>}
+          {
+            game.storeLinks.length > 0 && (
+              <p class="mt-4 text-sm text-muted">
+                <a href="#where-to-get" class="link">{t('game.stores')}</a>
+              </p>
+            )
+          }
         </div>
       </div>
     </div>
@@ -139,6 +140,11 @@ if (game.storeLinks.length) videoGame.sameAs = game.storeLinks.map((s) => s.url)
           {description.map((p) => <p>{p}</p>)}
         </div>
       </section>
+
+      <!-- Where to get -->
+      <div id="where-to-get" class="scroll-mt-24">
+        <GameStoreLinks game={game} lang={lang} variant="section" />
+      </div>
 
       <!-- Features -->
       <section aria-labelledby="features">
@@ -155,6 +161,24 @@ if (game.storeLinks.length) videoGame.sameAs = game.storeLinks.map((s) => s.url)
         </ul>
         {game.featuresNote && <p class="mt-4 text-sm text-muted">{pick(game.featuresNote, lang)}</p>}
       </section>
+
+      <!-- Planned features: kept strictly apart from the current features -->
+      {
+        game.plannedFeatures && (
+          <section aria-labelledby="planned" class="rounded-2xl border border-dashed border-line p-5 sm:p-6">
+            <h2 id="planned" class="section-title">{t('game.planned')}</h2>
+            <p class="mt-2 text-sm text-muted">{t('game.plannedNote')}</p>
+            <ul class="mt-5 grid gap-3 sm:grid-cols-2">
+              {pick(game.plannedFeatures, lang).map((f) => (
+                <li class="flex gap-3 rounded-xl bg-bg-2 p-4 text-sm text-[#d9dce3]">
+                  <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full border-2 border-muted" aria-hidden="true" />
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
 
       <!-- Screenshots -->
       <section aria-labelledby="screenshots">
@@ -247,10 +271,18 @@ if (game.storeLinks.length) videoGame.sameAs = game.storeLinks.map((s) => s.url)
         devlogs.length > 0 && (
           <section aria-labelledby="game-devlogs">
             <h2 id="game-devlogs" class="section-title">{t('game.devlogs')}</h2>
-            <ul class="mt-5 space-y-3">
+            <ul class="mt-5 grid gap-3">
               {devlogs.map((d) => (
-                <li>
-                  <a href={localePath(lang, `/devlogs/${d.slug}/`)} class="link">{d.entry.data.title}</a>
+                <li class="card p-5">
+                  <time class="text-xs text-muted" datetime={d.entry.data.date.toISOString().slice(0, 10)}>
+                    {formatDate(d.entry.data.date.toISOString().slice(0, 10), lang)}
+                  </time>
+                  <h3 class="mt-1.5 font-bold">
+                    <a href={localePath(lang, `/devlogs/${d.slug}/`)} class="hover:text-accent-text">
+                      {d.entry.data.title}
+                    </a>
+                  </h3>
+                  <p class="mt-1.5 text-sm text-muted">{d.entry.data.description}</p>
                 </li>
               ))}
             </ul>
@@ -280,7 +312,7 @@ if (game.storeLinks.length) videoGame.sameAs = game.storeLinks.map((s) => s.url)
             <dd class="mt-0.5 font-medium">{game.engine}</dd>
           </div>
           {
-            (game.releaseDate || game.status === 'in-development') && (
+            (game.releaseDate || game.status !== 'released') && (
               <div>
                 <dt class="text-muted">{t('game.release')}</dt>
                 <dd class="mt-0.5 font-medium">
@@ -290,25 +322,6 @@ if (game.storeLinks.length) videoGame.sameAs = game.storeLinks.map((s) => s.url)
             )
           }
         </dl>
-      </div>
-
-      <div class="card p-5">
-        <h2 class="font-bold">{t('game.stores')}</h2>
-        {
-          game.storeLinks.length > 0 ? (
-            <ul class="mt-3 space-y-2">
-              {game.storeLinks.map((s) => (
-                <li>
-                  <a href={s.url} class="link text-sm" rel="noopener noreferrer" target="_blank">
-                    {s.store} <span class="sr-only">({t('common.external')})</span>↗
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p class="mt-2 text-sm text-muted">{t('game.storesNone')}</p>
-          )
-        }
       </div>
 
       <div class="card p-5">

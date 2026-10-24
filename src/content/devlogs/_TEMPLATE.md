@@ -10,7 +10,7 @@
 title: Post title
 description: One or two sentences shown in lists and search results (max 200 characters).
 date: 2026-10-22
-game: spincraft-2-creative # spincraft | spincraft-2-creative | echoes-of-the-earth | dead-sector-outbreak | studio
+game: spincraft-2-creative # spincraft | spincraft-2-creative | echoes-of-the-earth | velkrion-the-first-breach | studio
 draft: true
 ---
 

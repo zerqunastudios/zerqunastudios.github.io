@@ -72,7 +72,11 @@ const en = {
   'game.requirementsNone': 'Official system requirements have not been published yet.',
   'game.minimum': 'Minimum',
   'game.recommended': 'Recommended',
-  'game.stores': 'Where to get it',
+  'game.stores': 'Where to Get',
+  'game.storesIntro': 'Official store page for this game. Links open in a new tab.',
+  'game.getOn': 'Get on {store}',
+  'game.planned': 'Planned Features',
+  'game.plannedNote': 'These are plans, not features of the current build. They are not in the game yet and may change.',
   'game.storesNone': 'Official store links will be added here once the game is available.',
   'game.support': 'Game support',
   'game.supportText': 'Problems with this game? Visit its support page.',
@@ -95,6 +99,7 @@ const en = {
   'devlogs.back': 'Back to devlogs',
   'devlogs.published': 'Published',
   'devlogs.updated': 'Updated',
+  'devlogs.getGame': 'Get the game',
   'devlogs.translationMissing': 'This post is not yet available in Turkish. Showing the English version.',
 
   'downloads.title': 'Downloads',
@@ -111,6 +116,7 @@ const en = {
   'downloads.safety':
     'Only download Zerquna Studios games from the links on this page or from our official store pages. If you find our games on another site, please let us know.',
   'downloads.comingSoon': 'Download link coming soon',
+  'downloads.alsoOn': 'Also available on itch.io',
 
   'support.title': 'Support Center',
   'support.intro':
@@ -230,7 +236,11 @@ const tr: Record<UIKey, string> = {
   'game.requirementsNone': 'Resmî sistem gereksinimleri henüz yayımlanmadı.',
   'game.minimum': 'Minimum',
   'game.recommended': 'Önerilen',
-  'game.stores': 'Nereden edinilir',
+  'game.stores': 'Nereden Edinilir',
+  'game.storesIntro': 'Bu oyunun resmî mağaza sayfası. Bağlantılar yeni sekmede açılır.',
+  'game.getOn': '{store} üzerinden edinin',
+  'game.planned': 'Gelecek Planları',
+  'game.plannedNote': 'Bunlar plandır, mevcut sürümün özellikleri değildir. Henüz oyunda yer almazlar ve değişebilirler.',
   'game.storesNone': 'Oyun erişime açıldığında resmî mağaza bağlantıları burada yer alacak.',
   'game.support': 'Oyun desteği',
   'game.supportText': 'Bu oyunla ilgili bir sorun mu var? Destek sayfasını ziyaret edin.',
@@ -253,6 +263,7 @@ const tr: Record<UIKey, string> = {
   'devlogs.back': 'Günlüklere dön',
   'devlogs.published': 'Yayımlanma',
   'devlogs.updated': 'Güncelleme',
+  'devlogs.getGame': 'Oyunu edinin',
   'devlogs.translationMissing': 'Bu yazı henüz Türkçe olarak mevcut değil. İngilizce sürüm gösteriliyor.',
 
   'downloads.title': 'İndirmeler',
@@ -269,6 +280,7 @@ const tr: Record<UIKey, string> = {
   'downloads.safety':
     'Zerquna Studios oyunlarını yalnızca bu sayfadaki bağlantılardan veya resmî mağaza sayfalarımızdan indirin. Oyunlarımızı başka bir sitede görürseniz lütfen bize bildirin.',
   'downloads.comingSoon': 'İndirme bağlantısı yakında',
+  'downloads.alsoOn': 'itch.io’da da mevcut',
 
   'support.title': 'Destek Merkezi',
   'support.intro':

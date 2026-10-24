@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import EmptyState from '../../components/EmptyState.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
+import GameStoreLinks from '../../components/GameStoreLinks.astro';
 import { games, gamePath } from '../../data/games';
 import type { Locale } from '../../data/site';
 import { getLangStaticPaths, localePath, pick, useTranslations } from '../../i18n/utils';
@@ -14,6 +15,8 @@ const t = useTranslations(lang);
 const downloads = games.flatMap((g) => g.downloads.map((d) => ({ game: g, ...d })));
 // Games that have a demo or release but no published download link yet.
 const pending = games.filter((g) => g.status !== 'in-development' && g.downloads.length === 0 && g.storeLinks.length === 0);
+// Games offered on a store page but without a separate free download (e.g. a paid release).
+const storeOnly = games.filter((g) => g.downloads.length === 0 && g.storeLinks.length > 0);
 ---
 
 <BaseLayout lang={lang} title={t('downloads.title')} description={t('downloads.intro')} path="/downloads/">
@@ -22,8 +25,8 @@ const pending = games.filter((g) => g.status !== 'in-development' && g.downloads
   <section class="container-site mt-10 space-y-8">
     {
       downloads.length > 0 ? (
-        <div class="overflow-x-auto card">
-          <table class="w-full text-left text-sm">
+        <div class="sm:overflow-x-auto sm:rounded-[0.875rem] sm:border sm:border-line sm:bg-card">
+          <table class="stack-table w-full text-left text-sm">
             <thead class="border-b border-line text-muted">
               <tr>
                 <th scope="col" class="p-4 font-semibold">{t('nav.games')}</th>
@@ -37,15 +40,15 @@ const pending = games.filter((g) => g.status !== 'in-development' && g.downloads
             <tbody>
               {downloads.map((d) => (
                 <tr class="border-b border-line last:border-0">
-                  <td class="p-4">
+                  <td class="p-4" data-label={t('nav.games')}>
                     <a href={localePath(lang, gamePath(d.game))} class="font-semibold hover:text-accent-text">{d.game.title}</a>
                     <div class="text-muted">{pick(d.title, lang)}</div>
                   </td>
-                  <td class="p-4">{d.version}</td>
-                  <td class="p-4">{d.platform}</td>
-                  <td class="p-4">{d.source}</td>
-                  <td class="p-4">{d.size ?? '—'}</td>
-                  <td class="p-4">
+                  <td class="p-4" data-label={t('downloads.version')}>{d.version}</td>
+                  <td class="p-4" data-label={t('downloads.platform')}>{d.platform}</td>
+                  <td class="p-4" data-label={t('downloads.source')}>{d.source}</td>
+                  <td class="p-4" data-label={t('downloads.size')}>{d.size ?? '—'}</td>
+                  <td class="p-4 sm:text-right">
                     <a href={d.url} class="btn btn-primary !min-h-0 !py-2" rel="noopener noreferrer" target="_blank">
                       {t('downloads.get')} <span class="sr-only">({t('common.external')})</span>
                     </a>
@@ -76,6 +79,28 @@ const pending = games.filter((g) => g.status !== 'in-development' && g.downloads
             </li>
           ))}
         </ul>
+      )
+    }
+
+    {
+      storeOnly.length > 0 && (
+        <section aria-labelledby="also-on">
+          <h2 id="also-on" class="section-title">{t('downloads.alsoOn')}</h2>
+          <ul class="mt-5 grid gap-4 sm:grid-cols-2">
+            {storeOnly.map((g) => (
+              <li class="card flex flex-col gap-4 p-5">
+                <div>
+                  <a href={localePath(lang, gamePath(g))} class="font-bold hover:text-accent-text">{g.title}</a>
+                  <div class="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-muted">
+                    <StatusBadge status={g.status} lang={lang} />
+                    <span>{g.platforms.join(', ')}</span>
+                  </div>
+                </div>
+                <GameStoreLinks game={g} lang={lang} variant="buttons" />
+              </li>
+            ))}
+          </ul>
+        </section>
       )
     }
 

@@ -7,7 +7,7 @@ export const SITE = {
   copyrightStartYear: 2026,
   // Date the Privacy Policy text was last changed (ISO yyyy-mm-dd).
   // Update this whenever src/pages/[lang]/privacy-policy.astro changes.
-  privacyPolicyUpdated: '2026-10-22',
+  privacyPolicyUpdated: '2026-10-25',
   termsUpdated: '2026-10-22',
   // Official social profiles. Leave empty until an official account exists.
   social: [] as { name: string; url: string }[],

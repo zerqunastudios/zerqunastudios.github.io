@@ -9,8 +9,16 @@ const BASE = (process.env.BASE_PATH || '/').replace(/\/+$/, '');
 const SITE = (process.env.SITE_URL || 'http://localhost:4321').replace(/\/+$/, '');
 const LANGS = ['en', 'tr'];
 const EMAIL = 'zerquna.studios@gmail.com';
-// Projects that must never appear on this website.
-const FORBIDDEN = [/synapse/i, /BM Voice/, /Kenna Studio Dashboard/i];
+// Projects that must never appear on this website, and retired game names.
+// ("Dead Sector: Outbreak" is now VELKRION: THE FIRST BREACH. The old URL slug
+// "dead-sector-outbreak" is allowed only for the redirect pages.)
+const FORBIDDEN = [/synapse/i, /BM Voice/, /Kenna Studio Dashboard/i, /Dead\s+Sector/i];
+// Official store pages that must be linked from their game pages.
+const STORE_LINKS = {
+  spincraft: 'https://zerqunastudios.itch.io/spincraft-wood-workshop',
+  'echoes-of-the-earth': 'https://zerqunastudios.itch.io/echoes-of-the-earth',
+  'velkrion-the-first-breach': 'https://zerqunastudios.itch.io/velkrion-the-first-breach',
+};
 
 const errors = [];
 const fail = (msg) => errors.push(msg);
@@ -62,6 +70,13 @@ for (const f of htmlFiles) {
 }
 
 for (const [path, { html }] of pages) {
+  // Moved-page redirects are tiny forwarding pages: check only that they forward.
+  if (/<meta http-equiv="refresh"/.test(html) && path !== 'index.html') {
+    if (!/<meta name="robots" content="noindex/.test(html)) fail(`/${path}: redirect page must be noindex`);
+    const to = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+    if (!to) fail(`/${path}: redirect page has no canonical target`);
+    continue;
+  }
   const isRedirect = path === 'index.html';
   if (!/<html lang="(en|tr)"/.test(html)) fail(`/${path}: missing <html lang>`);
   if (!/<title>[^<]+<\/title>/.test(html)) fail(`/${path}: missing <title>`);
@@ -111,7 +126,20 @@ for (const [path, { html }] of pages) {
   }
 }
 
-// 5. Sitemap ---------------------------------------------------------------------
+// 5. Store links on game pages -------------------------------------------------
+for (const [slug, url] of Object.entries(STORE_LINKS)) {
+  for (const lang of LANGS) {
+    const page = pages.get(`${lang}/games/${slug}/index.html`);
+    if (!page) continue; // reported as a missing route above
+    const anchors = [...page.html.matchAll(new RegExp(`<a[^>]+href="${url.replace(/[.]/g, '\\.')}"[^>]*>`, 'g'))];
+    if (anchors.length < 2) fail(`/${lang}/games/${slug}/: expected the itch.io link in the hero and in "Where to Get"`);
+    for (const a of anchors) {
+      if (!/rel="noopener noreferrer"/.test(a[0]) || !/target="_blank"/.test(a[0])) fail(`/${lang}/games/${slug}/: external link without rel/target`);
+    }
+  }
+}
+
+// 6. Sitemap ---------------------------------------------------------------------
 const sitemapFiles = files.filter((f) => /sitemap-\d+\.xml$/.test(f));
 const sitemap = sitemapFiles.map((f) => readFileSync(f, 'utf8')).join('\n');
 for (const lang of LANGS) {
@@ -120,6 +148,7 @@ for (const lang of LANGS) {
   }
 }
 if (/<loc>[^<]*404/.test(sitemap)) fail('Sitemap contains the 404 page');
+if (/dead-sector/i.test(sitemap)) fail('Sitemap contains a moved (redirect) page');
 
 // Report -------------------------------------------------------------------------
 console.log(`Checked ${htmlFiles.length} HTML pages, ${checked} internal links, ${slugs.length} games.`);
