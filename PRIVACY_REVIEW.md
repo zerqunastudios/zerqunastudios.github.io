@@ -134,6 +134,8 @@ Project: `D:\DeadSectorOutbreak` (folder name kept on purpose; renamed from "Dea
 | Godot log files in `...\logs\` | ✅ folder seen on dev PC |
 | Network test of the itch.io demo build (item 2.2) | ☐ to do |
 | Official itch.io page | ✅ https://zerqunastudios.itch.io/velkrion-the-first-breach |
+| **Before publishing the next build (after v0.1.0):** the development build checked on 5 Nov 2026 still has no network code, but it adds local files `user://language_settings.cfg` and `user://dialogue_settings.cfg`, and the campaign save now also stores squad states (health, position, weapons, ammo), Military Credits with purchase receipts, and medkit inventory. Update `privacy.localData` in `src/data/games.ts` and the policy date when that build ships | ☐ to do at release |
+| Development-only save `development_squad_save.json` is used by the test scene only; confirm it is not created in the shipped build | ☐ confirm at export |
 | Release date, requirements | ☐ at release |
 
 ---
